@@ -47,6 +47,7 @@ const state = {
   selectedDate: getTodayDate(),
   activeView: "overview",
   drawerOpen: false,
+  topbarActionsOpen: false,
   importPreview: null,
   user: null,
   dashboard: null,
@@ -78,6 +79,8 @@ const sessionBadge = document.querySelector("#session-badge");
 const sessionUserName = document.querySelector("#session-user-name");
 const apiStatus = document.querySelector("#api-status");
 const topbar = document.querySelector(".topbar");
+const topbarActions = document.querySelector("#topbar-actions");
+const topbarActionsToggle = document.querySelector("#topbar-actions-toggle");
 const brandHomeButton = document.querySelector("#brand-home-button");
 const sidebarToggleButton = document.querySelector("#sidebar-toggle");
 const sidebarCloseButton = document.querySelector("#sidebar-close");
@@ -355,6 +358,10 @@ function isDesktopDrawer() {
   return window.matchMedia("(min-width: 1180px)").matches;
 }
 
+function isCompactTopbar() {
+  return window.matchMedia("(max-width: 820px)").matches;
+}
+
 function parseViewFromHash() {
   const hash = window.location.hash.replace(/^#/, "");
   const normalized = hash.startsWith("view-") ? hash.slice(5) : hash;
@@ -378,6 +385,21 @@ function setDrawerOpen(open, { skipFocus = false } = {}) {
 
   if (!state.drawerOpen && !skipFocus) {
     sidebarToggleButton?.focus();
+  }
+}
+
+function setTopbarActionsOpen(open) {
+  state.topbarActionsOpen = Boolean(open);
+
+  topbarActions?.classList.toggle("is-open", state.topbarActionsOpen);
+  topbarActionsToggle?.setAttribute("aria-expanded", String(state.topbarActionsOpen));
+
+  requestAnimationFrame(syncLayoutMetrics);
+}
+
+function syncTopbarActionsMode() {
+  if (!isCompactTopbar() && state.topbarActionsOpen) {
+    setTopbarActionsOpen(false);
   }
 }
 
@@ -470,6 +492,7 @@ function setActiveView(view, { closeDrawer, focusTarget, scrollToTop = true, upd
 function scheduleActiveSectionSync() {
   cancelAnimationFrame(scheduleActiveSectionSync.frameId);
   scheduleActiveSectionSync.frameId = requestAnimationFrame(() => {
+    syncTopbarActionsMode();
     syncLayoutMetrics();
     syncDrawerMode();
     updateActiveSectionLink();
@@ -3672,6 +3695,18 @@ brandHomeButton?.addEventListener("click", () => {
 
 sidebarToggleButton?.addEventListener("click", () => {
   setDrawerOpen(!state.drawerOpen);
+});
+
+topbarActionsToggle?.addEventListener("click", () => {
+  setTopbarActionsOpen(!state.topbarActionsOpen);
+});
+
+topbarActions?.addEventListener("click", (event) => {
+  if (!isCompactTopbar() || !event.target.closest("button, a")) {
+    return;
+  }
+
+  setTopbarActionsOpen(false);
 });
 
 sidebarCloseButton?.addEventListener("click", () => {

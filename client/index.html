@@ -6,7 +6,7 @@
     <title>Рацион | Персональный дневник питания</title>
     <meta name="theme-color" content="#6f93a0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=mobile-menu" />
   </head>
   <body>
     <div class="page-shell">
@@ -29,9 +29,19 @@
           <button id="brand-home-button" class="brand brand-button" type="button" aria-label="На главную">
             Рацион
           </button>
+          <button
+            id="topbar-actions-toggle"
+            class="topbar-actions-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="topbar-actions"
+            aria-label="Открыть действия"
+          >
+            <span aria-hidden="true">...</span>
+          </button>
         </div>
 
-        <div class="topbar-actions">
+        <div id="topbar-actions" class="topbar-actions">
           <a class="topbar-chip" href="/api/docs" target="_blank" rel="noreferrer">Схема API</a>
           <button id="theme-toggle" class="topbar-chip" type="button">Темная тема</button>
           <button id="export-json-button" class="topbar-chip hidden" type="button">
@@ -1274,6 +1284,6 @@
       </article>
     </template>
 
-    <script src="/app.js?v=exports-json-pdf" defer></script>
+    <script src="/app.js?v=mobile-menu" defer></script>
   </body>
 </html>

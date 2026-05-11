@@ -192,7 +192,26 @@ body[data-theme="dark"] .topbar {
   transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
+.topbar-actions-toggle {
+  appearance: none;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-strong);
+  color: var(--accent-strong);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
 .menu-toggle:hover,
+.topbar-actions-toggle:hover,
 .drawer-close:hover,
 .brand-button:hover {
   transform: translateY(-1px);
@@ -1917,16 +1936,75 @@ button:disabled {
 
   .topbar {
     top: 8px;
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 10px;
+    border-radius: 16px;
   }
 
   .topbar-brand-block,
-  .topbar-actions,
   .filter-row {
     width: 100%;
     max-width: none;
     justify-content: flex-start;
+  }
+
+  .topbar-brand-block {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .topbar-actions-toggle {
+    display: inline-flex;
+  }
+
+  .topbar-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    max-width: none;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: max-height 180ms ease, opacity 160ms ease, transform 160ms ease;
+  }
+
+  .topbar-actions.is-open {
+    max-height: min(58vh, 420px);
+    overflow-y: auto;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .topbar-chip-status,
+  #session-badge {
+    grid-column: 1 / -1;
+  }
+
+  .topbar-actions .topbar-chip,
+  .topbar-actions .ghost-button {
+    width: 100%;
+  }
+
+  .menu-toggle {
+    min-width: 44px;
+    padding: 0 12px;
+  }
+
+  .brand-button {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    justify-self: center;
   }
 
   .workspace-sidebar {
@@ -1996,9 +2074,7 @@ button:disabled {
   .ghost-button,
   .danger-button,
   .primary-link,
-  .ghost-link,
-  .topbar-chip,
-  .menu-toggle {
+  .ghost-link {
     width: 100%;
   }
 
