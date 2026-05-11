@@ -1307,6 +1307,251 @@ async function seedPostgresWorkspace(userId) {
     now,
     now
   );
+
+  const metricCount = await db
+    .prepare(`SELECT COUNT(*) AS count FROM body_metrics WHERE user_id = ?`)
+    .get(userId);
+
+  if (metricCount.count === 0) {
+    const insertMetric = db.prepare(`
+      INSERT INTO body_metrics (
+        user_id, entry_date, weight_kg, body_fat, waist_cm, chest_cm, notes, created_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const lastWeek = getLocalDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+
+    await insertMetric.run(userId, lastWeek, 78.4, 18.6, 83, 102, "Контрольная утренняя запись.", now);
+    await insertMetric.run(userId, today, 78.2, 18.4, 82.5, 102, "Повторный замер после стабильной недели.", now);
+  }
+
+  const plannerCount = await db
+    .prepare(`SELECT COUNT(*) AS count FROM meal_plans WHERE user_id = ?`)
+    .get(userId);
+
+  if (plannerCount.count === 0) {
+    const template = await db
+      .prepare(`SELECT id FROM meal_templates WHERE user_id = ? ORDER BY id ASC LIMIT 1`)
+      .get(userId);
+    const insertPlan = db.prepare(`
+      INSERT INTO meal_plans (
+        user_id, entry_date, meal_type, title, target_calories, target_protein,
+        target_fat, target_carbs, planned_time, completed, linked_template_id, created_at, updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const plans = [
+      ["Завтрак", "Белковый завтрак", 430, 32, 14, 42, "08:00", 1],
+      ["Обед", "Курица с рисом и овощами", 620, 44, 18, 68, "13:00", 0],
+      ["Ужин", "Легкий ужин с рыбой", 430, 34, 11, 30, "19:30", 0]
+    ];
+
+    for (const plan of plans) {
+      await insertPlan.run(
+        userId,
+        today,
+        plan[0],
+        plan[1],
+        plan[2],
+        plan[3],
+        plan[4],
+        plan[5],
+        plan[6],
+        plan[7],
+        template?.id || null,
+        now,
+        now
+      );
+    }
+  }
+
+  const shoppingCount = await db
+    .prepare(`SELECT COUNT(*) AS count FROM shopping_items WHERE user_id = ?`)
+    .get(userId);
+
+  if (shoppingCount.count === 0) {
+    const insertItem = db.prepare(`
+      INSERT INTO shopping_items (
+        user_id, title, category, quantity, unit, planned_for, source, notes, is_checked, created_at, updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const items = [
+      ["Греческий йогурт", "Белковые продукты", 4, "шт", today, "quick-add", "На неделю", 0],
+      ["Овсяные хлопья", "Крупы и гарниры", 1, "уп", today, "planner", "Для завтраков", 0],
+      ["Брокколи", "Овощи", 2, "уп", today, "planner", "", 0],
+      ["Бананы", "Фрукты", 6, "шт", today, "recommendation", "Для перекусов", 1]
+    ];
+
+    for (const item of items) {
+      await insertItem.run(userId, item[0], item[1], item[2], item[3], item[4], item[5], item[6], item[7], now, now);
+    }
+  }
+
+  const recipeCount = await db.prepare(`SELECT COUNT(*) AS count FROM recipes WHERE user_id = ?`).get(userId);
+
+  if (recipeCount.count === 0) {
+    const products = await db
+      .prepare(
+        `
+          SELECT id, name, calories, protein, fat, carbs
+          FROM products
+        `
+      )
+      .all();
+    const productMap = new Map(products.map((item) => [item.name, item]));
+    const insertRecipe = db.prepare(`
+      INSERT INTO recipes (
+        user_id, title, meal_type, total_grams, calories, protein, fat, carbs, notes, instructions, created_at, updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const insertRecipeItem = db.prepare(`
+      INSERT INTO recipe_items (
+        recipe_id, product_id, product_name, grams, calories, protein, fat, carbs, created_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const recipes = [
+      {
+        title: "Боул с курицей и рисом",
+        mealType: "Обед",
+        notes: "Базовый обед с понятным балансом КБЖУ.",
+        instructions: "Отварить рис, приготовить курицу без лишнего масла, добавить брокколи.",
+        ingredients: [
+          ["Куриная грудка", 180],
+          ["Рис басмати", 160],
+          ["Брокколи", 120]
+        ]
+      },
+      {
+        title: "Йогуртовый перекус с фруктами",
+        mealType: "Перекус",
+        notes: "Легкий вариант между основными приемами пищи.",
+        instructions: "Смешать йогурт с нарезанным бананом и миндалем.",
+        ingredients: [
+          ["Греческий йогурт", 180],
+          ["Банан", 120],
+          ["Миндаль", 20]
+        ]
+      },
+      {
+        title: "Лосось с брокколи",
+        mealType: "Ужин",
+        notes: "Спокойный ужин с высоким белком.",
+        instructions: "Запечь лосось, брокколи приготовить на пару.",
+        ingredients: [
+          ["Лосось", 180],
+          ["Брокколи", 180]
+        ]
+      }
+    ];
+
+    for (const recipe of recipes) {
+      const items = recipe.ingredients
+        .map(([productName, grams]) => {
+          const product = productMap.get(productName);
+
+          if (!product) {
+            return null;
+          }
+
+          const ratio = grams / 100;
+
+          return {
+            productId: product.id,
+            productName: product.name,
+            grams,
+            calories: Number((product.calories * ratio).toFixed(1)),
+            protein: Number((product.protein * ratio).toFixed(1)),
+            fat: Number((product.fat * ratio).toFixed(1)),
+            carbs: Number((product.carbs * ratio).toFixed(1))
+          };
+        })
+        .filter(Boolean);
+
+      if (!items.length) {
+        continue;
+      }
+
+      const totals = items.reduce(
+        (accumulator, item) => {
+          accumulator.grams += item.grams;
+          accumulator.calories += item.calories;
+          accumulator.protein += item.protein;
+          accumulator.fat += item.fat;
+          accumulator.carbs += item.carbs;
+          return accumulator;
+        },
+        { grams: 0, calories: 0, protein: 0, fat: 0, carbs: 0 }
+      );
+
+      const result = await insertRecipe.run(
+        userId,
+        recipe.title,
+        recipe.mealType,
+        totals.grams,
+        Number(totals.calories.toFixed(1)),
+        Number(totals.protein.toFixed(1)),
+        Number(totals.fat.toFixed(1)),
+        Number(totals.carbs.toFixed(1)),
+        recipe.notes,
+        recipe.instructions,
+        now,
+        now
+      );
+
+      for (const item of items) {
+        await insertRecipeItem.run(
+          result.lastInsertRowid,
+          item.productId,
+          item.productName,
+          item.grams,
+          item.calories,
+          item.protein,
+          item.fat,
+          item.carbs,
+          now
+        );
+      }
+    }
+  }
+
+  const favoriteProductCount = await db
+    .prepare(`SELECT COUNT(*) AS count FROM favorite_products WHERE user_id = ?`)
+    .get(userId);
+
+  if (favoriteProductCount.count === 0) {
+    const products = await db
+      .prepare(`SELECT id FROM products ORDER BY calories DESC, protein DESC LIMIT 4`)
+      .all();
+    const insertFavoriteProduct = db.prepare(`
+      INSERT OR IGNORE INTO favorite_products (user_id, product_id, created_at)
+      VALUES (?, ?, ?)
+    `);
+
+    for (const product of products) {
+      await insertFavoriteProduct.run(userId, product.id, now);
+    }
+  }
+
+  const favoriteTemplateCount = await db
+    .prepare(`SELECT COUNT(*) AS count FROM favorite_templates WHERE user_id = ?`)
+    .get(userId);
+
+  if (favoriteTemplateCount.count === 0) {
+    const templates = await db
+      .prepare(`SELECT id FROM meal_templates WHERE user_id = ? ORDER BY usage_count DESC, id ASC LIMIT 3`)
+      .all(userId);
+    const insertFavoriteTemplate = db.prepare(`
+      INSERT OR IGNORE INTO favorite_templates (user_id, template_id, created_at)
+      VALUES (?, ?, ?)
+    `);
+
+    for (const template of templates) {
+      await insertFavoriteTemplate.run(userId, template.id, now);
+    }
+  }
 }
 
 function runMigrations() {
@@ -1365,6 +1610,7 @@ function initializeDatabase(options = {}) {
     }
 
     await seedPostgresProducts(adminId);
+    await seedPostgresWorkspace(adminId);
     await seedPostgresWorkspace(demoId);
   })();
 }
