@@ -1,111 +1,237 @@
 # Рацион
 
-> Персональный дневник питания с анализом КБЖУ
+[![CI](https://github.com/mikhailbobr/kyrsrksp/actions/workflows/ci.yml/badge.svg)](https://github.com/mikhailbobr/kyrsrksp/actions/workflows/ci.yml)
+[![CD](https://github.com/mikhailbobr/kyrsrksp/actions/workflows/cd.yml/badge.svg)](https://github.com/mikhailbobr/kyrsrksp/actions/workflows/cd.yml)
+![Node.js](https://img.shields.io/badge/Node.js-20%2F22-339933)
+![Express](https://img.shields.io/badge/Express-5.x-111111)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED)
 
-Клиент-серверное fullstack-приложение для ведения дневника питания, контроля калорий и макронутриентов, планирования рациона, отслеживания воды, самочувствия и сопутствующих показателей.
+> Персональный дневник питания с анализом КБЖУ, планированием рациона и полной серверной API-частью.
 
-Проект оформлен как курсовая работа по теме:
+`Рацион` - клиент-серверное fullstack-приложение для учета питания, контроля калорий и макронутриентов, планирования меню, отслеживания воды, самочувствия, замеров тела и сопутствующей дневной аналитики.
 
-> «Персональный дневник питания с анализом КБЖУ»
+Проект оформлен как курсовая работа по теме «Персональный дневник питания с анализом КБЖУ» и доведен до deploy-ready состояния: есть модульный backend, статический frontend, OpenAPI/Swagger, PostgreSQL-контур, Docker, GitHub Actions, тесты и эксплуатационная документация.
 
-Текущий pre-release кандидат: `1.0.0-rc.3`
+Текущий pre-release кандидат: `1.0.0-rc.3`.
 
-**Автор и правообладатель:** Кашпирев М. Д.  
-Проект создан Кашпиревым М. Д. Все права на проект принадлежат автору. © 2026 Кашпирев М. Д. Все права защищены.
+<picture>
+  <img src="./client/hero-dashboard-illustration.svg" alt="Интерфейс дневника питания Рацион" width="100%">
+</picture>
 
-## Исходные данные проекта
+## Содержание
 
-- тема: «Персональный дневник питания с анализом КБЖУ»;
-- методология: Twelve-Factor App, описание соответствия в [docs/06-twelve-factor.md](./docs/06-twelve-factor.md);
-- система контроля версий: `Git`, репозиторий содержит `.git`, GitHub Actions, Dockerfile и README;
-- нормативная база оформления: инструкция по организации и проведению курсового проектирования `СМКО МИРЭА 7.5.1/04.И.05-18`;
-- основная БД runtime/deploy-контура: `PostgreSQL`.
+- [Возможности](#возможности)
+- [Технологический стек](#технологический-стек)
+- [Быстрый запуск](#быстрый-запуск)
+- [Тестовые учетные записи](#тестовые-учетные-записи)
+- [Данные и seed](#данные-и-seed)
+- [Полезные команды](#полезные-команды)
+- [Архитектура](#архитектура)
+- [API](#api)
+- [Тестирование и качество](#тестирование-и-качество)
+- [CI/CD без случайного production deploy](#cicd-без-случайного-production-deploy)
+- [Покрытие требований курсовой](#покрытие-требований-курсовой)
+- [Структура проекта](#структура-проекта)
+- [Документация](#документация)
+
+## Возможности
+
+- регистрация, вход, JWT-сессия и получение текущего профиля;
+- роли `user` и `admin` с разграничением доступа к административным операциям;
+- персональные цели по калориям, белкам, жирам и углеводам;
+- готовые пресеты целей и быстрый перенос цели в профиль;
+- CRUD для приемов пищи с фильтрацией по дате и типу;
+- справочник продуктов с поиском и административным управлением;
+- рецепты, шаблоны приемов пищи и избранное;
+- генерация недельного плана питания;
+- трекер воды, самочувствие, readiness-сводка и замеры тела;
+- список покупок с добавлением продуктов и отметкой выполненных пунктов;
+- заметка дня и дневная аналитика;
+- SVG-графики по КБЖУ, воде и динамике показателей;
+- импорт данных из `JSON` и `TSV` с предпросмотром;
+- выгрузка дневного отчета в `JSON` и `PDF`;
+- Swagger UI и исходная OpenAPI-схема;
+- демо-данные для локального и облачного стенда;
+- Docker/Docker Compose и cloud-ready конфигурация для Render;
+- автоматические тесты, негативные сценарии, contract checks и fuzzing.
 
 ## Технологический стек
 
-- frontend: `HTML + CSS + JavaScript`
-- backend: `Node.js 22 + Express`
-- database: `PostgreSQL` with `SQLite` fallback for isolated local tests
-- auth: `JWT + role-based access control`
-- docs: `OpenAPI + Swagger UI`
-- tests: `node:test`
-- containers: `Docker + docker-compose`
-- CI/CD: `GitHub Actions + GHCR`
-- cloud-ready deploy: `Render`
+| Зона | Технологии |
+| --- | --- |
+| Frontend | `HTML`, `CSS`, vanilla `JavaScript` |
+| Backend | `Node.js 22`, `Express 5` |
+| База данных | `PostgreSQL` для runtime/deploy, `SQLite` как локальный fallback |
+| Auth | `JWT`, роли `user/admin`, bcrypt-хеширование паролей |
+| API docs | `OpenAPI`, `Swagger UI` |
+| Tests | `node:test`, contract checks, fuzzing, coverage gates |
+| Containers | `Docker`, `docker-compose` |
+| CI/CD | `GitHub Actions`, `GHCR`, manual/tag-based CD |
+| Cloud | `Render` blueprint через `render.yaml` |
 
-## Что реализовано в приложении
+## Быстрый запуск
 
-- регистрация, вход и получение профиля пользователя;
-- роли `user` и `admin`;
-- персональные цели по КБЖУ и готовые пресеты целей;
-- CRUD для приемов пищи;
-- справочник продуктов с административным управлением;
-- рецепты, шаблоны и избранное;
-- генерация недельного плана питания;
-- трекер воды, самочувствие, замеры тела;
-- список покупок;
-- заметка дня, дневная аналитика и визуальные SVG-графики;
-- импорт данных из `JSON` и `TSV` с предпросмотром и шаблонами файлов;
-- экспорт отчета в `JSON` и `PDF`;
-- Swagger по `/api/docs`;
-- seed-данные для демонстрации;
-- Docker и cloud-ready deploy-конфигурация;
-- автоматические тесты, негативные сценарии и fuzzing.
+Требования:
+
+- `Node.js 22` для локального запуска без Docker;
+- `Docker` и `Docker Compose` для полного PostgreSQL-контура.
+
+### Вариант 1: Docker Compose
+
+```bash
+docker compose up --build
+```
+
+После запуска:
+
+- приложение: `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/api/docs`
+- OpenAPI JSON: `http://localhost:8080/api/openapi.json`
+- readiness check: `http://localhost:8080/api/ready`
+
+### Вариант 2: локальный Node.js
+
+```bash
+npm install
+npm run config:check
+npm run migrate
+npm run dev
+```
+
+По умолчанию пример конфигурации находится в [.env.example](./.env.example). Для production нельзя оставлять `JWT_SECRET=change_me`.
+
+## Тестовые учетные записи
+
+Если включены `SEED_DEMO_DATA=true` или `SEED_LARGE_DATA=true`, доступны учетные записи:
+
+| Роль | Логин | Пароль |
+| --- | --- | --- |
+| Пользователь | `demo@nutritrack.local` | `Demo123!` |
+| Администратор | `admin@nutritrack.local` | `Admin123!` |
+
+## Данные и seed
+
+- `PostgreSQL` используется как основная БД для Docker/runtime/deploy-контура, включая Render.
+- `SQLite` оставлен как легкий fallback для локальных изолированных запусков и тестов.
+- `AUTO_MIGRATE_ON_BOOT=true` автоматически применяет схему при старте сервиса.
+- `SEED_DEMO_DATA=true` включает базовый демонстрационный набор данных.
+- `SEED_LARGE_DATA=true` включает массовый seed для полноценной демо-базы.
+- В [docker-compose.yml](./docker-compose.yml) массовый seed включен для локального PostgreSQL-стенда.
+- В [render.yaml](./render.yaml) массовый seed включен для облачного демо-стенда, но автоматический deploy выключен.
+- `npm run seed:large` запускает массовое наполнение вручную. Команда идемпотентна и не должна создавать дубли при повторном запуске.
+
+## Полезные команды
+
+| Команда | Назначение |
+| --- | --- |
+| `npm run dev` | запуск сервера в watch-режиме |
+| `npm run start` | обычный запуск приложения |
+| `npm run config:check` | проверка runtime-конфигурации |
+| `npm run migrate` | применение схемы БД |
+| `npm run create-admin -- --email=admin@example.com --password=Admin123! --name="Admin User"` | создание администратора |
+| `npm run seed:demo` | человекочитаемые демо-данные |
+| `npm run seed:large` | массовое демо-наполнение |
+| `npm run check:client` | статические frontend-контракты |
+| `npm test` | основной набор тестов |
+| `npm run test:coverage` | полный отчет: результаты, surface coverage и V8 coverage |
+| `npm run test:fuzz` | fuzzing-сценарии |
+| `npm run test:full` | frontend checks и полный coverage gate |
+| `docker compose up --build` | полный локальный запуск |
+| `docker compose --profile ops run --rm migrate` | миграция через одноразовый контейнер |
+
+## Архитектура
+
+Приложение построено как монолитный web service с разделением клиентской и серверной частей внутри одного репозитория:
+
+- `client` - статический интерфейс, который обслуживается Express;
+- `server/src/app.js` - сборка Express-приложения, API routes, Swagger и static middleware;
+- `server/src/modules` - доменные модули формата `routes + service`;
+- `server/src/db` - подключение к БД, инициализация схемы и seed;
+- `server/src/middlewares` - request context, auth/RBAC и обработка ошибок;
+- `server/tests` - API, smoke, security, contracts, observability, import/export и fuzz тесты.
+
+Основной runtime-контур рассчитан на PostgreSQL. SQLite сохранен как fallback, чтобы тесты и локальные эксперименты могли запускаться без внешней БД.
+
+## API
+
+Основные entry points:
+
+| Endpoint | Назначение |
+| --- | --- |
+| `GET /api/health` | базовое состояние сервиса |
+| `GET /api/live` | liveness check |
+| `GET /api/ready` | readiness check с проверкой БД |
+| `GET /api/openapi.json` | исходная OpenAPI-схема |
+| `GET /api/docs` | Swagger UI |
+| `POST /api/auth/register` | регистрация пользователя |
+| `POST /api/auth/login` | вход и получение JWT |
+| `GET /api/dashboard` | дневная сводка |
+| `GET /api/imports/template` | шаблон импорта |
+| `POST /api/imports/preview` | предпросмотр импорта |
+| `POST /api/imports/apply` | применение импорта |
+| `GET /api/exports/daily-report` | дневной отчет в `JSON` или `PDF` |
+
+Полная матрица маршрутов описана в [wiki/API.md](./wiki/API.md), [docs/03-api-draft.md](./docs/03-api-draft.md) и автоматически проверяемой OpenAPI-схеме.
+
+## Тестирование и качество
+
+Качество проекта закрывается несколькими слоями:
+
+- `npm run check:client` проверяет статические frontend-контракты;
+- `npm test` запускает 80 автоматических тестов на `node:test`;
+- `npm run test:coverage` генерирует таблицу результатов, surface coverage и raw Node/V8 coverage;
+- `npm run test:v8` включает пороги `100/100/100` по lines, branches и functions;
+- `npm run test:surface` подтверждает 100% покрытие заявленной функциональной поверхности;
+- `npm run test:fuzz` прогоняет детерминированные fuzz-сценарии для защиты от 500-ошибок на мусорных payload.
+
+Текущий отчет:
+
+| Поверхность | Покрыто | Всего | Покрытие |
+| --- | ---: | ---: | ---: |
+| OpenAPI-операции | 63 | 63 | 100% |
+| Серверные модули | 17 | 17 | 100% |
+| Frontend-контракты | 10 | 10 | 100% |
+| Fuzz-сценарии | 4 | 4 | 100% |
+
+Подробности находятся в [docs/05-testing-and-quality.md](./docs/05-testing-and-quality.md) и [docs/11-test-coverage-report.md](./docs/11-test-coverage-report.md).
+
+## CI/CD без случайного production deploy
+
+Настройка сделана так, чтобы обычный commit/push в GitHub запускал только CI, а CD и production deploy не стартовали сами.
+
+- [ci.yml](./.github/workflows/ci.yml) запускается на каждый push, pull request, ручной запуск и nightly schedule.
+- CI выполняет матричные тесты на Node `20/22`, frontend-contract checks, coverage summary, Docker build validation и PostgreSQL-backed smoke checks.
+- [cd.yml](./.github/workflows/cd.yml) больше не запускается на branch push в `main` или `master`.
+- CD запускается только при push тега `v*` или вручную через `workflow_dispatch`.
+- Render deploy hook вызывается только при ручном запуске CD с ветки `main` или `master`.
+- В CD workflow нет `environment: production`, поэтому обычные documentation commits не создают запись `production` в блоке GitHub Deployments.
+- В [render.yaml](./render.yaml) установлен `autoDeploy: false`, чтобы подключенный Render-сервис не деплоил каждый commit напрямую мимо GitHub Actions.
+
+Практический результат: если закоммитить изменения README, на GitHub должен пройти только workflow `CI`. Workflow `CD` останется неактивным, а production deployment не появится как на скриншоте.
 
 ## Покрытие требований курсовой
 
-### 1. Анализ предметной области
+| Требование | Где закрыто |
+| --- | --- |
+| Анализ предметной области | [docs/01-domain-overview.md](./docs/01-domain-overview.md) |
+| Клиент-серверная архитектура | [docs/02-architecture.md](./docs/02-architecture.md), [server/src](./server/src), [client](./client) |
+| UML-материалы | [docs/diagrams](./docs/diagrams) |
+| Выбор программного стека | этот README и [docs/02-architecture.md](./docs/02-architecture.md) |
+| Авторизация и ролевая модель | [server/src/modules/auth](./server/src/modules/auth), [server/src/middlewares/auth.js](./server/src/middlewares/auth.js) |
+| База данных и тестовые данные | [server/src/db](./server/src/db), [scripts/seed-readable-demo.js](./scripts/seed-readable-demo.js) |
+| Негативные сценарии | [server/tests/api.test.js](./server/tests/api.test.js), [server/tests/contracts.test.js](./server/tests/contracts.test.js) |
+| Fuzzing | [server/tests/fuzz.test.js](./server/tests/fuzz.test.js) |
+| Git, Dockerfile, README | [.github/workflows](./.github/workflows), [Dockerfile](./Dockerfile), этот README |
+| Облачное развертывание | [render.yaml](./render.yaml), [deploy/README.md](./deploy/README.md), [docs/09-ops-and-runtime-checklist.md](./docs/09-ops-and-runtime-checklist.md) |
 
-Подготовлен в [docs/01-domain-overview.md](./docs/01-domain-overview.md).
-
-### 2. Клиент-серверная архитектура и UML
-
-Архитектура описана в [docs/02-architecture.md](./docs/02-architecture.md).
-
-UML-материалы:
+UML-диаграммы:
 
 - [docs/diagrams/use-case.puml](./docs/diagrams/use-case.puml)
 - [docs/diagrams/component-diagram.puml](./docs/diagrams/component-diagram.puml)
 - [docs/diagrams/sequence-login.puml](./docs/diagrams/sequence-login.puml)
 - [docs/diagrams/deployment-diagram.puml](./docs/diagrams/deployment-diagram.puml)
 - [docs/diagrams/entity-diagram.puml](./docs/diagrams/entity-diagram.puml)
-
-### 3. Выбор программного стека
-
-Стек зафиксирован в этом README и в [docs/02-architecture.md](./docs/02-architecture.md).
-
-### 4. Клиентская и серверная части, авторизация, БД, тестовые данные, ролевая модель
-
-Все перечисленное реализовано в коде:
-
-- backend в [server/src](./server/src)
-- frontend в [client](./client)
-- инициализация БД в [server/src/db/init-schema.js](./server/src/db/init-schema.js)
-- массовый seed в [server/src/db/seed-large-data.js](./server/src/db/seed-large-data.js)
-- проверки ролей в [server/src/middlewares/auth.js](./server/src/middlewares/auth.js)
-- негативные сценарии в [server/tests/api.test.js](./server/tests/api.test.js)
-
-### 5. Фаззинг-тестирование
-
-Отдельный fuzzing-сценарий расположен в [server/tests/fuzz.test.js](./server/tests/fuzz.test.js).
-
-### 6. Git, Dockerfile, README и структура проекта
-
-В репозитории присутствуют:
-
-- [Dockerfile](./Dockerfile)
-- [deploy/docker/server.Dockerfile](./deploy/docker/server.Dockerfile)
-- [deploy/docker/client.Dockerfile](./deploy/docker/client.Dockerfile)
-- [docker-compose.yml](./docker-compose.yml)
-- [deploy/README.md](./deploy/README.md)
-
-### 7. Облачное развертывание
-
-Подготовлена deploy-ready конфигурация:
-
-- [render.yaml](./render.yaml)
-
-Ограничение: фактический деплой в облако требует внешнего доступа к GitHub и облачной платформе. В этой локальной сессии подготовлены все конфиги и инструкции, но сам внешний запуск выполняется уже вне sandbox.
 
 ## Структура проекта
 
@@ -114,17 +240,18 @@ UML-материалы:
 |-- client/
 |   |-- app.js
 |   |-- favicon.svg
+|   |-- hero-dashboard-illustration.svg
 |   |-- index.html
 |   |-- styles.css
 |   `-- README.md
 |-- server/
-|   |-- data/
 |   |-- src/
 |   |   |-- config/
 |   |   |-- db/
 |   |   |-- lib/
 |   |   |-- middlewares/
-|   |   `-- modules/
+|   |   |-- modules/
+|   |   `-- runtime/
 |   |-- tests/
 |   `-- README.md
 |-- docs/
@@ -145,115 +272,35 @@ UML-материалы:
 |   `-- README.md
 |-- wiki/
 |-- .github/workflows/
-|-- .dockerignore
+|   |-- ci.yml
+|   `-- cd.yml
 |-- .env.example
 |-- CHANGELOG.md
+|-- Dockerfile
 |-- docker-compose.yml
 |-- package.json
 |-- package-lock.json
 `-- render.yaml
 ```
 
-## Быстрый запуск
+## Документация
 
-Требование: `Node.js 22`.
+- [client/README.md](./client/README.md) - устройство frontend-части;
+- [server/README.md](./server/README.md) - устройство backend-части;
+- [deploy/README.md](./deploy/README.md) - контейнерный запуск и облачный контур;
+- [wiki/Home.md](./wiki/Home.md) - навигация по wiki;
+- [wiki/Architecture.md](./wiki/Architecture.md) - архитектура приложения;
+- [wiki/API.md](./wiki/API.md) - API и сценарии интеграции;
+- [wiki/Testing-and-QA.md](./wiki/Testing-and-QA.md) - тестирование и QA;
+- [wiki/Deployment.md](./wiki/Deployment.md) - deployment notes;
+- [wiki/Operations.md](./wiki/Operations.md) - эксплуатационные команды;
+- [docs/06-twelve-factor.md](./docs/06-twelve-factor.md) - соответствие Twelve-Factor App;
+- [docs/08-pre-release-checklist.md](./docs/08-pre-release-checklist.md) - pre-release checklist;
+- [docs/10-swagger-and-api-quality.md](./docs/10-swagger-and-api-quality.md) - Swagger и качество API-документации;
+- [CHANGELOG.md](./CHANGELOG.md) - история изменений.
 
-```bash
-npm install
-docker compose up --build
-```
+## Авторские права
 
-Приложение:
+**Автор и правообладатель:** Кашпирев М. Д.
 
-```text
-http://localhost:8080
-```
-
-Swagger:
-
-```text
-http://localhost:8080/api/docs
-```
-
-## Тестовые учетные записи
-
-- пользователь: `demo@nutritrack.local / Demo123!`
-- администратор: `admin@nutritrack.local / Admin123!`
-
-## Полезные команды
-
-```bash
-npm run dev
-npm run config:check
-npm run build
-npm run migrate
-npm run create-admin -- --email=admin@example.com --password=Admin123! --name="Admin User"
-npm run seed:large
-npm run check:client
-npm run pre-release
-npm run release
-npm test
-npm run test:results
-npm run test:coverage
-npm run test:fuzz
-npm run test:surface
-npm run test:full
-npm run test:v8
-npm run test:v8:raw
-docker compose up --build
-docker compose --profile ops run --rm migrate
-```
-
-Отчет 100% по функциональной поверхности, таблица выполнения всех тестов и сырая Node/V8 таблица `file | line % | branch % | funcs % | uncovered lines` генерируются командой `npm run test:coverage`. Основной отчет сохраняется в [docs/11-test-coverage-report.md](./docs/11-test-coverage-report.md), runner пишет `coverage/test-results.md` и `coverage/test-results.json`. Команда `npm run test:v8` дополнительно включает пороги `100/100/100` и падает, если V8-таблица перестает быть полностью зеленой.
-
-## Docker и deploy
-
-Локальный контейнерный запуск:
-
-```bash
-docker compose up --build
-```
-
-Подробнее:
-
-- [deploy/README.md](./deploy/README.md)
-
-## Документация API
-
-- OpenAPI JSON: `GET /api/openapi.json`
-- Swagger UI: `GET /api/docs`
-- Health: `GET /api/health`, `GET /api/live`, `GET /api/ready`
-- Import template: `GET /api/imports/template`
-- Import preview/apply: `POST /api/imports/preview`, `POST /api/imports/apply`
-
-## Wiki и проектные материалы
-
-- [wiki/Home.md](./wiki/Home.md)
-- [wiki/Architecture.md](./wiki/Architecture.md)
-- [wiki/API.md](./wiki/API.md)
-- [wiki/Testing-and-QA.md](./wiki/Testing-and-QA.md)
-- [wiki/Deployment.md](./wiki/Deployment.md)
-- [docs/07-course-checklist.md](./docs/07-course-checklist.md)
-- [docs/08-pre-release-checklist.md](./docs/08-pre-release-checklist.md)
-- [CHANGELOG.md](./CHANGELOG.md)
-
-## Качество и методология
-
-- тестирование и fuzzing: [docs/05-testing-and-quality.md](./docs/05-testing-and-quality.md)
-- методология Twelve-Factor: [docs/06-twelve-factor.md](./docs/06-twelve-factor.md)
-
-## CI/CD
-- актуальный CI: матричные прогоны на Node `20/22`, проверка фронтенд-контрактов, coverage summary, docker validation и smoke-проверка одноразовых команд контейнера на PostgreSQL
-- актуальный CD: multi-platform публикация Docker image в `GHCR`, `SBOM/provenance`, отдельный шаг `migrate` из опубликованного образа на PostgreSQL и опциональный deploy hook для Render
-- GitHub Packages заполняется контейнерным пакетом `ghcr.io/<owner>/<repo>/food-diary-app` после push в `main`/`master`, тега вида `v1.0.0-rc.3` или ручного запуска workflow `CD`
-
-- [ci.yml](./.github/workflows/ci.yml) — матричный CI, coverage и docker validation
-- [cd.yml](./.github/workflows/cd.yml) — multi-platform publish в `GHCR` и deploy hook для Render
-- [docs/09-ops-and-runtime-checklist.md](./docs/09-ops-and-runtime-checklist.md) — эксплуатационный checklist по Docker, env-конфигурации, логированию и runtime
-- [wiki/Operations.md](./wiki/Operations.md) — быстрые operational-команды проекта
-
-## Swagger и качество API
-
-Swagger UI доступен по адресу `http://localhost:8080/api/docs`, а исходная OpenAPI-схема доступна по `http://localhost:8080/api/openapi.json`.
-
-Подробное описание оформления Swagger, правил документирования маршрутов и автоматических проверок находится в [docs/10-swagger-and-api-quality.md](./docs/10-swagger-and-api-quality.md).
+Проект создан Кашпиревым М. Д. Все права на проект принадлежат автору. © 2026 Кашпирев М. Д. Все права защищены.

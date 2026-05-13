@@ -22,7 +22,7 @@ docker compose up --build
 ## CI/CD
 
 - CI: матрица `Node 20/22`, фронтенд-контракты, тесты, coverage, docker validation;
-- CD: multi-platform image в `GHCR`, `SBOM`, `provenance`, optional Render deploy hook.
+- CD: multi-platform image в `GHCR`, `SBOM`, `provenance`, optional Render deploy hook по тегу `v*` или ручному запуску.
 
 Файлы:
 
@@ -31,4 +31,4 @@ docker compose up --build
 
 ## Облако
 
-Для облачного запуска подготовлен [render.yaml](../render.yaml). Финальный deploy выполняется после push в GitHub и настройки секретов/Render-интеграции.
+Для облачного запуска подготовлен [render.yaml](../render.yaml). Автоматический deploy на каждый commit отключен; финальный deploy выполняется вручную после зеленого CI и настройки секретов/Render-интеграции.
