@@ -1,11 +1,73 @@
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
- "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
-<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="1915.000000pt" height="821.000000pt" viewBox="0 0 1915.000000 821.000000"
- preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Racion dashboard preview</title>
+  <desc id="desc">Preview illustration of the food diary dashboard with nutrition cards and charts.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7fbf6"/>
+      <stop offset="0.48" stop-color="#eef7ff"/>
+      <stop offset="1" stop-color="#fff8ef"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f8f5b"/>
+      <stop offset="1" stop-color="#2a6fba"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#1f2937" flood-opacity="0.16"/>
+    </filter>
+  </defs>
 
-<g transform="translate(0.000000,821.000000) scale(0.100000,-0.100000)"
-fill="#000000" stroke="none">
-</g>
+  <rect width="1200" height="520" rx="32" fill="url(#bg)"/>
+  <circle cx="1050" cy="80" r="120" fill="#dff3e8" opacity="0.7"/>
+  <circle cx="118" cy="430" r="150" fill="#dbeafe" opacity="0.65"/>
+
+  <g filter="url(#shadow)">
+    <rect x="90" y="64" width="1020" height="392" rx="28" fill="#ffffff"/>
+  </g>
+
+  <rect x="90" y="64" width="1020" height="72" rx="28" fill="#152238"/>
+  <rect x="90" y="112" width="1020" height="24" fill="#152238"/>
+  <circle cx="130" cy="100" r="10" fill="#ff6b6b"/>
+  <circle cx="164" cy="100" r="10" fill="#ffd166"/>
+  <circle cx="198" cy="100" r="10" fill="#54d17a"/>
+  <text x="240" y="108" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">Racion</text>
+  <text x="365" y="108" font-family="Inter, Arial, sans-serif" font-size="15" fill="#b9c8da">food diary dashboard</text>
+
+  <rect x="126" y="166" width="250" height="254" rx="22" fill="#f8fafc" stroke="#e5e7eb"/>
+  <text x="152" y="208" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Today</text>
+  <text x="152" y="246" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="800" fill="#152238">1840</text>
+  <text x="266" y="246" font-family="Inter, Arial, sans-serif" font-size="18" fill="#64748b">kcal</text>
+  <rect x="152" y="282" width="186" height="12" rx="6" fill="#e5e7eb"/>
+  <rect x="152" y="282" width="138" height="12" rx="6" fill="url(#accent)"/>
+  <text x="152" y="326" font-family="Inter, Arial, sans-serif" font-size="16" fill="#64748b">Goal progress</text>
+  <text x="152" y="356" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#2f8f5b">74%</text>
+  <rect x="152" y="380" width="42" height="12" rx="6" fill="#2f8f5b"/>
+  <rect x="206" y="380" width="42" height="12" rx="6" fill="#2a6fba"/>
+  <rect x="260" y="380" width="42" height="12" rx="6" fill="#f59e0b"/>
+
+  <rect x="412" y="166" width="300" height="118" rx="22" fill="#f8fafc" stroke="#e5e7eb"/>
+  <text x="438" y="206" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#111827">Macros</text>
+  <rect x="438" y="228" width="220" height="10" rx="5" fill="#e5e7eb"/>
+  <rect x="438" y="228" width="168" height="10" rx="5" fill="#2f8f5b"/>
+  <rect x="438" y="250" width="220" height="10" rx="5" fill="#e5e7eb"/>
+  <rect x="438" y="250" width="124" height="10" rx="5" fill="#2a6fba"/>
+
+  <rect x="412" y="302" width="300" height="118" rx="22" fill="#f8fafc" stroke="#e5e7eb"/>
+  <text x="438" y="342" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#111827">Hydration</text>
+  <text x="438" y="382" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800" fill="#2a6fba">1600 ml</text>
+  <path d="M646 394c25-26 36-47 36-66 0-28-19-47-36-47s-36 19-36 47c0 19 11 40 36 66z" fill="#bfdbfe"/>
+
+  <rect x="748" y="166" width="326" height="254" rx="22" fill="#f8fafc" stroke="#e5e7eb"/>
+  <text x="776" y="208" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#111827">Weekly balance</text>
+  <polyline points="784,360 824,318 864,330 904,272 944,292 984,236 1030,248" fill="none" stroke="#2f8f5b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="784,384 824,372 864,350 904,356 944,326 984,318 1030,286" fill="none" stroke="#2a6fba" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="784" y1="386" x2="1032" y2="386" stroke="#d1d5db" stroke-width="2"/>
+  <line x1="784" y1="326" x2="1032" y2="326" stroke="#e5e7eb" stroke-width="2"/>
+  <line x1="784" y1="266" x2="1032" y2="266" stroke="#e5e7eb" stroke-width="2"/>
+  <circle cx="984" cy="236" r="9" fill="#2f8f5b"/>
+  <circle cx="1030" cy="286" r="9" fill="#2a6fba"/>
+
+  <rect x="776" y="228" width="74" height="28" rx="14" fill="#dcfce7"/>
+  <text x="794" y="248" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#166534">protein</text>
+  <rect x="864" y="228" width="70" height="28" rx="14" fill="#dbeafe"/>
+  <text x="884" y="248" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#1d4ed8">water</text>
 </svg>

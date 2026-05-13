@@ -15,9 +15,7 @@
 
 Текущий pre-release кандидат: `1.0.0-rc.3`.
 
-<picture>
-  <img src="./client/hero-dashboard-illustration.svg" alt="Интерфейс дневника питания Рацион" width="100%">
-</picture>
+![Интерфейс дневника питания Рацион](./client/hero-dashboard-illustration.svg)
 
 ## Содержание
 
