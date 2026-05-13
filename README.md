@@ -15,7 +15,7 @@
 
 Текущий pre-release кандидат: `1.0.0-rc.3`.
 
-![Интерфейс дневника питания Рацион](./client/hero-dashboard-illustration.svg)
+![Рацион](./client/readme-hero.png)
 
 ## Содержание
 
@@ -241,6 +241,7 @@ UML-диаграммы:
 |   |-- favicon.svg
 |   |-- hero-dashboard-illustration.svg
 |   |-- index.html
+|   |-- readme-hero.png
 |   |-- styles.css
 |   `-- README.md
 |-- server/
