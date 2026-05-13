@@ -1,73 +1,90 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
-  <title id="title">Racion dashboard preview</title>
-  <desc id="desc">Preview illustration of the food diary dashboard with nutrition cards and charts.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 696" role="img" aria-labelledby="title desc">
+  <title id="title">Racion logo hero</title>
+  <desc id="desc">Wide dark hero image with the Racion app logo centered.</desc>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f7fbf6"/>
-      <stop offset="0.48" stop-color="#eef7ff"/>
-      <stop offset="1" stop-color="#fff8ef"/>
+    <linearGradient id="heroBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#30363d"/>
+      <stop offset="0.5" stop-color="#20272d"/>
+      <stop offset="1" stop-color="#171d23"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2f8f5b"/>
-      <stop offset="1" stop-color="#2a6fba"/>
+    <radialGradient id="heroGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1030 346) rotate(90) scale(350 520)">
+      <stop offset="0" stop-color="#7f95aa" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#7f95aa" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="capsulePrimary" x1="8" y1="8" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#89A8C8"/>
+      <stop offset="1" stop-color="#BFD0E2"/>
     </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#1f2937" flood-opacity="0.16"/>
+    <linearGradient id="capsuleSecondary" x1="56" y1="52" x2="92" y2="90" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9AB4CF"/>
+      <stop offset="1" stop-color="#C8D7E8"/>
+    </linearGradient>
+    <linearGradient id="orb" x1="54" y1="18" x2="78" y2="42" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C5D4E5"/>
+      <stop offset="1" stop-color="#91ABC5"/>
+    </linearGradient>
+    <radialGradient id="surface" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(48 48) rotate(90) scale(58)">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F2F6FB"/>
+    </radialGradient>
+    <filter id="logoShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="28" stdDeviation="34" flood-color="#0b1117" flood-opacity="0.5"/>
     </filter>
+    <clipPath id="outerClip">
+      <rect x="12" y="15" width="2024" height="666" rx="47"/>
+    </clipPath>
   </defs>
 
-  <rect width="1200" height="520" rx="32" fill="url(#bg)"/>
-  <circle cx="1050" cy="80" r="120" fill="#dff3e8" opacity="0.7"/>
-  <circle cx="118" cy="430" r="150" fill="#dbeafe" opacity="0.65"/>
-
-  <g filter="url(#shadow)">
-    <rect x="90" y="64" width="1020" height="392" rx="28" fill="#ffffff"/>
+  <rect width="2048" height="696" fill="#12181e"/>
+  <g clip-path="url(#outerClip)">
+    <rect x="12" y="15" width="2024" height="666" rx="47" fill="url(#heroBg)"/>
+    <rect x="12" y="15" width="2024" height="666" rx="47" fill="url(#heroGlow)"/>
+    <path d="M270 572 1520 15" stroke="#6b747e" stroke-width="2" opacity="0.28"/>
+    <path d="M1210 306 1905 -30" stroke="#8b949e" stroke-width="2.4" opacity="0.42"/>
+    <path d="M-90 120 320 -24" stroke="#68727c" stroke-width="1.6" opacity="0.12"/>
   </g>
+  <rect x="12" y="15" width="2024" height="666" rx="47" fill="none" stroke="#707982" stroke-width="2.2" opacity="0.6"/>
+  <rect x="15" y="18" width="2018" height="660" rx="44" fill="none" stroke="#111820" stroke-width="2" opacity="0.7"/>
 
-  <rect x="90" y="64" width="1020" height="72" rx="28" fill="#152238"/>
-  <rect x="90" y="112" width="1020" height="24" fill="#152238"/>
-  <circle cx="130" cy="100" r="10" fill="#ff6b6b"/>
-  <circle cx="164" cy="100" r="10" fill="#ffd166"/>
-  <circle cx="198" cy="100" r="10" fill="#54d17a"/>
-  <text x="240" y="108" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">Racion</text>
-  <text x="365" y="108" font-family="Inter, Arial, sans-serif" font-size="15" fill="#b9c8da">food diary dashboard</text>
+  <g transform="translate(764 88) scale(5.4166667)" filter="url(#logoShadow)">
+    <rect width="96" height="96" rx="26" fill="url(#surface)"/>
+    <rect x="2" y="2" width="92" height="92" rx="24" stroke="#D9E4EF" stroke-width="2"/>
 
-  <rect x="126" y="166" width="250" height="254" rx="22" fill="#f8fafc" stroke="#e5e7eb"/>
-  <text x="152" y="208" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Today</text>
-  <text x="152" y="246" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="800" fill="#152238">1840</text>
-  <text x="266" y="246" font-family="Inter, Arial, sans-serif" font-size="18" fill="#64748b">kcal</text>
-  <rect x="152" y="282" width="186" height="12" rx="6" fill="#e5e7eb"/>
-  <rect x="152" y="282" width="138" height="12" rx="6" fill="url(#accent)"/>
-  <text x="152" y="326" font-family="Inter, Arial, sans-serif" font-size="16" fill="#64748b">Goal progress</text>
-  <text x="152" y="356" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" fill="#2f8f5b">74%</text>
-  <rect x="152" y="380" width="42" height="12" rx="6" fill="#2f8f5b"/>
-  <rect x="206" y="380" width="42" height="12" rx="6" fill="#2a6fba"/>
-  <rect x="260" y="380" width="42" height="12" rx="6" fill="#f59e0b"/>
-
-  <rect x="412" y="166" width="300" height="118" rx="22" fill="#f8fafc" stroke="#e5e7eb"/>
-  <text x="438" y="206" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#111827">Macros</text>
-  <rect x="438" y="228" width="220" height="10" rx="5" fill="#e5e7eb"/>
-  <rect x="438" y="228" width="168" height="10" rx="5" fill="#2f8f5b"/>
-  <rect x="438" y="250" width="220" height="10" rx="5" fill="#e5e7eb"/>
-  <rect x="438" y="250" width="124" height="10" rx="5" fill="#2a6fba"/>
-
-  <rect x="412" y="302" width="300" height="118" rx="22" fill="#f8fafc" stroke="#e5e7eb"/>
-  <text x="438" y="342" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#111827">Hydration</text>
-  <text x="438" y="382" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800" fill="#2a6fba">1600 ml</text>
-  <path d="M646 394c25-26 36-47 36-66 0-28-19-47-36-47s-36 19-36 47c0 19 11 40 36 66z" fill="#bfdbfe"/>
-
-  <rect x="748" y="166" width="326" height="254" rx="22" fill="#f8fafc" stroke="#e5e7eb"/>
-  <text x="776" y="208" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#111827">Weekly balance</text>
-  <polyline points="784,360 824,318 864,330 904,272 944,292 984,236 1030,248" fill="none" stroke="#2f8f5b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <polyline points="784,384 824,372 864,350 904,356 944,326 984,318 1030,286" fill="none" stroke="#2a6fba" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
-  <line x1="784" y1="386" x2="1032" y2="386" stroke="#d1d5db" stroke-width="2"/>
-  <line x1="784" y1="326" x2="1032" y2="326" stroke="#e5e7eb" stroke-width="2"/>
-  <line x1="784" y1="266" x2="1032" y2="266" stroke="#e5e7eb" stroke-width="2"/>
-  <circle cx="984" cy="236" r="9" fill="#2f8f5b"/>
-  <circle cx="1030" cy="286" r="9" fill="#2a6fba"/>
-
-  <rect x="776" y="228" width="74" height="28" rx="14" fill="#dcfce7"/>
-  <text x="794" y="248" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#166534">protein</text>
-  <rect x="864" y="228" width="70" height="28" rx="14" fill="#dbeafe"/>
-  <text x="884" y="248" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#1d4ed8">water</text>
+    <g opacity="0.96">
+      <rect
+        x="-8"
+        y="15"
+        width="46"
+        height="20"
+        rx="10"
+        transform="rotate(-34 -8 15)"
+        fill="url(#capsulePrimary)"
+      />
+      <rect
+        x="58"
+        y="64"
+        width="46"
+        height="20"
+        rx="10"
+        transform="rotate(-34 58 64)"
+        fill="url(#capsuleSecondary)"
+      />
+      <circle cx="71" cy="28" r="11" fill="url(#orb)"/>
+      <circle cx="33" cy="66" r="12" fill="#F8FBFE" stroke="#E1EAF3" stroke-width="1.5"/>
+      <path
+        d="M-2 39C9.4 31.3 18.9 24.8 28.8 18.4C35.4 14.1 41 13.7 47.2 18.4"
+        stroke="white"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        opacity="0.88"
+      />
+      <path
+        d="M61.8 15.8C68.6 22.5 73.5 27.4 78.7 33.2C82.2 37 86.4 38.1 92.4 35.7"
+        stroke="white"
+        stroke-width="2.3"
+        stroke-linecap="round"
+        opacity="0.82"
+      />
+    </g>
+  </g>
 </svg>
