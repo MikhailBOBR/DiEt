@@ -11,6 +11,8 @@ const API_OPERATION_COVERAGE = {
   postAuthRegister: ["api.test.js", "auth-session.test.js", "fuzz.test.js"],
   postAuthLogin: ["api.test.js", "auth-session.test.js", "contracts.test.js", "fuzz.test.js"],
   getAuthMe: ["auth-session.test.js"],
+  getUsers: ["users.test.js"],
+  patchUsersIdRole: ["users.test.js"],
   getGoals: ["api-crud-coverage.test.js"],
   putGoals: ["api-crud-coverage.test.js", "contracts.test.js", "fuzz.test.js"],
   getGoalsPresets: ["api.test.js"],
@@ -87,7 +89,8 @@ const SERVER_MODULE_COVERAGE = {
   products: ["api.test.js", "api-crud-coverage.test.js", "fuzz.test.js"],
   recipes: ["api.test.js", "api-crud-coverage.test.js", "contracts.test.js", "fuzz.test.js"],
   shopping: ["api.test.js", "api-crud-coverage.test.js", "fuzz.test.js"],
-  templates: ["api.test.js", "api-crud-coverage.test.js"]
+  templates: ["api.test.js", "api-crud-coverage.test.js"],
+  users: ["users.test.js"]
 };
 
 const forbiddenTableUpper = new RegExp(["C", "S", "V"].join(""));

@@ -3,7 +3,7 @@ services:
     name: nutritrack-app
     runtime: docker
     dockerfilePath: ./Dockerfile
-    autoDeploy: false
+    autoDeploy: true
     healthCheckPath: /api/ready
     envVars:
       - key: APP_ENV

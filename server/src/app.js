@@ -23,6 +23,7 @@ const dayNotesRoutes = require("./modules/day-notes/day-notes.routes");
 const favoritesRoutes = require("./modules/favorites/favorites.routes");
 const recipesRoutes = require("./modules/recipes/recipes.routes");
 const importsRoutes = require("./modules/imports/imports.routes");
+const usersRoutes = require("./modules/users/users.routes");
 const { openApiDocument } = require("./modules/docs/openapi");
 const { swaggerUiOptions } = require("./modules/docs/swagger-ui");
 
@@ -142,6 +143,7 @@ function createApp() {
   app.use("/api/favorites", favoritesRoutes);
   app.use("/api/recipes", recipesRoutes);
   app.use("/api/imports", importsRoutes);
+  app.use("/api/users", usersRoutes);
 
   app.use(express.static(clientRoot));
 

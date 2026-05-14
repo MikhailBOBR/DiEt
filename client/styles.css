@@ -868,7 +868,8 @@ body[data-theme="dark"] .checkbox-field {
 .grid-form input,
 .grid-form select,
 .grid-form textarea,
-.toolbar-form input {
+.toolbar-form input,
+.user-role-select {
   width: 100%;
   min-height: 44px;
   padding: 11px 13px;
@@ -889,7 +890,8 @@ body[data-theme="dark"] .checkbox-field {
 .grid-form select:focus,
 .grid-form textarea:focus,
 .toolbar-form input:focus,
-.date-toolbar input:focus {
+.date-toolbar input:focus,
+.user-role-select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 4px rgba(126, 166, 165, 0.14);
@@ -899,7 +901,8 @@ body[data-theme="dark"] .date-toolbar input,
 body[data-theme="dark"] .grid-form input,
 body[data-theme="dark"] .grid-form select,
 body[data-theme="dark"] .grid-form textarea,
-body[data-theme="dark"] .toolbar-form input {
+body[data-theme="dark"] .toolbar-form input,
+body[data-theme="dark"] .user-role-select {
   background: rgba(13, 20, 31, 0.92);
   border-color: rgba(147, 163, 187, 0.2);
   color: var(--text);
@@ -911,7 +914,8 @@ body:not([data-theme="dark"]) .date-toolbar input,
 body:not([data-theme="dark"]) .grid-form input,
 body:not([data-theme="dark"]) .grid-form select,
 body:not([data-theme="dark"]) .grid-form textarea,
-body:not([data-theme="dark"]) .toolbar-form input {
+body:not([data-theme="dark"]) .toolbar-form input,
+body:not([data-theme="dark"]) .user-role-select {
   color-scheme: light;
 }
 
@@ -1525,6 +1529,64 @@ body[data-theme="dark"] #session-badge {
   gap: 14px;
 }
 
+#product-admin-panel {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.user-role-panel {
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.user-role-panel h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.user-role-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.user-role-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+}
+
+.user-role-main,
+.user-role-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.user-role-main > div,
+.user-role-title-row > * {
+  min-width: 0;
+}
+
+.user-role-main strong {
+  overflow-wrap: anywhere;
+}
+
+.user-role-control {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+}
+
 .product-card-head,
 .product-card-title-wrap {
   display: grid;
@@ -2041,6 +2103,7 @@ button:disabled {
   }
 
   .products-grid,
+  .user-role-list,
   .meal-kbju,
   .hero-side,
   .hero-points,

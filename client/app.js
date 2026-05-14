@@ -51,6 +51,7 @@ const state = {
   importPreview: null,
   user: null,
   dashboard: null,
+  users: [],
   goalPresets: [],
   meals: [],
   products: [],
@@ -116,6 +117,8 @@ const goalPresetsList = document.querySelector("#goal-presets-list");
 const productAdminPanel = document.querySelector("#product-admin-panel");
 const productsMeta = document.querySelector("#products-meta");
 const productsList = document.querySelector("#products-list");
+const usersMeta = document.querySelector("#users-meta");
+const usersList = document.querySelector("#users-list");
 const templatesList = document.querySelector("#templates-list");
 const favoriteProductsList = document.querySelector("#favorite-products-list");
 const favoriteTemplatesList = document.querySelector("#favorite-templates-list");
@@ -240,6 +243,7 @@ function setToken(token) {
 function clearSession() {
   state.token = null;
   state.user = null;
+  state.users = [];
   state.importPreview = null;
   localStorage.removeItem(tokenStorageKey);
 }
@@ -2430,6 +2434,73 @@ function renderWeeklyPlans() {
   });
 }
 
+function renderUsers(users) {
+  if (!usersList || !usersMeta) {
+    return;
+  }
+
+  usersList.innerHTML = "";
+  usersMeta.textContent = `${users.length} пользователей`;
+
+  if (!users.length) {
+    usersList.innerHTML =
+      '<article class="user-role-card"><p class="muted-text">Пользователи пока не загружены.</p></article>';
+    return;
+  }
+
+  users.forEach((user) => {
+    const isCurrentUser = user.id === state.user?.id;
+    const roleLabel = user.role === "admin" ? "Администратор" : "Пользователь";
+    const userCard = document.createElement("article");
+    userCard.className = "user-role-card";
+    userCard.innerHTML = `
+      <div class="user-role-main">
+        <div>
+          <div class="user-role-title-row">
+            <strong>${escapeHtml(user.name)}</strong>
+            ${isCurrentUser ? '<span class="info-badge info-badge-muted">Это вы</span>' : ""}
+          </div>
+          <p class="dashboard-note">${escapeHtml(user.email)}</p>
+        </div>
+        <span class="info-badge">${roleLabel}</span>
+      </div>
+      <label class="user-role-control">
+        Роль
+        <select class="user-role-select" ${isCurrentUser ? "disabled" : ""}>
+          <option value="user" ${user.role === "user" ? "selected" : ""}>Пользователь</option>
+          <option value="admin" ${user.role === "admin" ? "selected" : ""}>Администратор</option>
+        </select>
+      </label>
+    `;
+
+    const roleSelect = userCard.querySelector(".user-role-select");
+    roleSelect.addEventListener("change", async () => {
+      const previousRole = user.role;
+      const nextRole = roleSelect.value;
+
+      try {
+        roleSelect.disabled = true;
+        const updatedUser = await request(`/api/users/${user.id}/role`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            role: nextRole
+          })
+        });
+
+        state.users = state.users.map((item) => (item.id === updatedUser.id ? updatedUser : item));
+        renderUsers(state.users);
+        showFlash(`Роль пользователя ${updatedUser.email} обновлена`, "success");
+      } catch (error) {
+        roleSelect.value = previousRole;
+        roleSelect.disabled = isCurrentUser;
+        showFlash(error.message, "error");
+      }
+    });
+
+    usersList.append(userCard);
+  });
+}
+
 function renderProducts(products) {
   productsList.innerHTML = "";
   productsMeta.textContent = `${products.length} продуктов в справочнике`;
@@ -3061,6 +3132,21 @@ function renderDashboardSnapshot() {
     renderTemplates(state.templates);
   }
   productAdminPanel.classList.toggle("hidden", state.user.role !== "admin");
+  if (state.user.role !== "admin") {
+    state.users = [];
+  }
+  renderUsers(state.users);
+}
+
+async function loadUsers() {
+  if (state.user?.role !== "admin") {
+    state.users = [];
+    renderUsers(state.users);
+    return;
+  }
+
+  state.users = await request("/api/users");
+  renderUsers(state.users);
 }
 
 async function loadProducts() {
@@ -3131,6 +3217,7 @@ async function refreshWorkspace() {
 
   const optionalSections = await Promise.allSettled([
     loadGoalPresets(),
+    loadUsers(),
     loadMeals(),
     loadProducts(),
     loadRecipes(),

@@ -483,6 +483,7 @@ const openApiDocument = {
   tags: [
     { name: "Health", description: "Проверка доступности сервиса и технологического стека." },
     { name: "Auth", description: "Регистрация, вход и получение текущего профиля пользователя." },
+    { name: "Users", description: "Административное управление пользователями и ролями." },
     { name: "Goals", description: "Управление персональными целями по КБЖУ и пресетами." },
     { name: "Products", description: "Каталог продуктов и административное управление справочником." },
     { name: "Meals", description: "CRUD-операции с дневником приёмов пищи." },
@@ -873,6 +874,55 @@ const openApiDocument = {
             },
             required: ["user"]
           })
+        }
+      })
+    },
+    "/api/users": {
+      get: secured("List users", ["Users"], {
+        description: "Возвращает список пользователей для административного управления ролями.",
+        responses: {
+          200: jsonResponse("Список пользователей.", {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/User"
+            }
+          }),
+          403: {
+            $ref: "#/components/responses/ForbiddenError"
+          }
+        }
+      })
+    },
+    "/api/users/{id}/role": {
+      patch: secured("Update user role", ["Users"], {
+        description: "Меняет роль пользователя между `user` и `admin`.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  role: { type: "string", enum: ["user", "admin"], example: "admin" }
+                },
+                required: ["role"]
+              }
+            }
+          }
+        },
+        responses: {
+          200: jsonResponse("Роль пользователя обновлена.", {
+            $ref: "#/components/schemas/User"
+          }),
+          400: {
+            $ref: "#/components/responses/ValidationError"
+          },
+          403: {
+            $ref: "#/components/responses/ForbiddenError"
+          },
+          404: {
+            $ref: "#/components/responses/NotFoundError"
+          }
         }
       })
     },
