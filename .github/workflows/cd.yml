@@ -17,7 +17,7 @@ permissions:
   id-token: write
 
 env:
-  IMAGE_NAME: ghcr.io/mikhailbobr/kyrsrksp/food-diary-app
+  IMAGE_NAME: ghcr.io/mikhailbobr/diet/food-diary-app
 
 jobs:
   docker-publish:

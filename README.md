@@ -1,7 +1,7 @@
 # Рацион
 
-[![CI](https://github.com/mikhailbobr/kyrsrksp/actions/workflows/ci.yml/badge.svg)](https://github.com/mikhailbobr/kyrsrksp/actions/workflows/ci.yml)
-[![CD](https://github.com/mikhailbobr/kyrsrksp/actions/workflows/cd.yml/badge.svg)](https://github.com/mikhailbobr/kyrsrksp/actions/workflows/cd.yml)
+[![CI](https://github.com/MikhailBOBR/DiEt/actions/workflows/ci.yml/badge.svg)](https://github.com/MikhailBOBR/DiEt/actions/workflows/ci.yml)
+[![CD](https://github.com/MikhailBOBR/DiEt/actions/workflows/cd.yml/badge.svg)](https://github.com/MikhailBOBR/DiEt/actions/workflows/cd.yml)
 ![Node.js](https://img.shields.io/badge/Node.js-20%2F22-339933)
 ![Express](https://img.shields.io/badge/Express-5.x-111111)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)

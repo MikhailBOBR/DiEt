@@ -1,27 +1,51 @@
 @startuml
+skinparam componentStyle rectangle
+
 node "Developer machine" {
-  artifact "Git repository"
-  artifact "Docker / docker-compose"
+  artifact "Git working tree" as Worktree
+  artifact "Docker Compose" as Compose
+  artifact "One-off migrate / seed" as LocalAdmin
+  artifact "Web container" as LocalWeb
+  database "PostgreSQL 16" as LocalDb
 }
 
-node "GitHub Actions" {
-  artifact "CI workflow"
-  artifact "CD workflow"
-  artifact "GHCR image"
+node "GitHub" {
+  artifact "Git master commit" as GitCommit
+  artifact "CI workflow" as CI
+  artifact "CD workflow" as CD
+  artifact "GHCR release package" as GhcrImage
+  database "Temporary PostgreSQL 16" as CompatibilityDb
+  artifact "Deployment Job Summary" as Evidence
 }
 
-node "Cloud platform" {
-  node "Web service container" {
-    artifact "Node.js + Express app"
-    artifact "Static client assets"
-  }
-  database "Managed PostgreSQL\nbacking service" as CloudDB
+node "Render" {
+  artifact "Source build of the same Git commit" as RenderBuild
+  artifact "Pre-deploy migration process" as PreDeploy
+  artifact "Node.js + Express web process" as RenderWeb
+  database "Managed PostgreSQL" as RenderDb
 }
 
-"Git repository" --> "CI workflow"
-"CI workflow" --> "CD workflow"
-"CD workflow" --> "GHCR image"
-"GHCR image" --> "Web service container"
-"Web service container" --> CloudDB
-"Docker / docker-compose" --> "Web service container"
+Worktree --> GitCommit : push
+GitCommit --> CI
+CI --> CD : required checks
+CD --> GhcrImage : publish + SBOM/provenance
+GhcrImage --> CompatibilityDb : migration compatibility test
+
+CD --> RenderBuild : manual deploy hook
+RenderBuild --> PreDeploy
+PreDeploy --> RenderDb : npm run migrate
+RenderBuild --> RenderWeb : npm start
+RenderWeb --> RenderDb
+CD ..> RenderWeb : live / ready / health / OpenAPI smoke
+CD --> Evidence : commit SHA and smoke result
+
+Compose --> LocalAdmin
+LocalAdmin --> LocalDb : npm run migrate / explicit seed
+Compose --> LocalWeb
+LocalWeb --> LocalDb
+
+note bottom of GhcrImage
+  GHCR image проверяется как release package,
+  но текущий Render blueprint собирает commit самостоятельно.
+end note
 @enduml
