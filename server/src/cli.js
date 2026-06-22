@@ -1,14 +1,11 @@
 const {
   adminUser,
   appEnv,
-  autoMigrateOnBoot,
   dbProvider,
   getConfig,
   host,
   port,
-  releaseVersion,
-  seedDemoData,
-  seedLargeData: shouldSeedLargeData
+  releaseVersion
 } = require("./config/env");
 const { createApp } = require("./app");
 const { closeDatabase } = require("./db/connection");
@@ -28,9 +25,6 @@ function summarizeRuntimeConfig() {
     port: config.port,
     dbProvider: config.dbProvider,
     dbPoolMax: config.dbProvider === "postgres" ? config.dbPoolMax : undefined,
-    autoMigrateOnBoot: config.autoMigrateOnBoot,
-    seedDemoData: config.seedDemoData,
-    seedLargeData: config.seedLargeData,
     logLevel: config.logLevel,
     trustProxy: config.trustProxy,
     shutdownTimeoutMs: config.shutdownTimeoutMs
@@ -89,24 +83,19 @@ function parseCliArgs(argv = process.argv.slice(2)) {
 }
 
 async function runServerCommand() {
-  if (autoMigrateOnBoot) {
-    await initializeDatabase({ withSeedData: seedDemoData });
-
-    if (shouldSeedLargeData) {
-      const { seedLargeData } = require("./db/seed-large-data");
-      await seedLargeData({ initialize: false });
-    }
-  } else {
-    logger.info("database.bootstrap.skipped", {
-      reason: "AUTO_MIGRATE_ON_BOOT=false"
-    });
-  }
-
   const app = createApp();
   const server = createHttpServer(app);
   installProcessFailureHandlers(server);
 
   return server;
+}
+
+async function runSeedDemoCommand() {
+  await initializeDatabase({ withSeedData: true });
+  const summary = { provider: dbProvider, seeded: true };
+  logger.info("database.seed-demo.completed", summary);
+  await closeDatabase();
+  return summary;
 }
 
 async function runSeedLargeCommand() {
@@ -125,12 +114,20 @@ async function runMigrateCommand() {
 }
 
 async function runCreateAdminCommand(options) {
+  const email = String(options.email || adminUser.email).trim();
+  const password = String(options.password || adminUser.password);
+  const name = String(options.name || adminUser.name).trim();
+
+  if (!email || !name || password.length < 8) {
+    throw new Error("create-admin requires email, name and a password of at least 8 characters");
+  }
+
   await runMigrations();
 
   const result = await ensureAdminUser({
-    email: String(options.email || adminUser.email),
-    password: String(options.password || adminUser.password),
-    name: String(options.name || adminUser.name)
+    email,
+    password,
+    name
   });
 
   logger.info("admin-user.provisioned", {
@@ -159,8 +156,7 @@ async function runCommand(argv = process.argv.slice(2)) {
       dbProvider,
       host,
       port,
-      release: releaseVersion,
-      autoMigrateOnBoot
+      release: releaseVersion
     });
     return runServerCommand();
   }
@@ -171,6 +167,10 @@ async function runCommand(argv = process.argv.slice(2)) {
 
   if (command === "seed-large") {
     return runSeedLargeCommand();
+  }
+
+  if (command === "seed-demo") {
+    return runSeedDemoCommand();
   }
 
   if (command === "create-admin") {
@@ -197,6 +197,7 @@ module.exports = {
   installProcessFailureHandlers,
   parseCliArgs,
   runCommand,
+  runSeedDemoCommand,
   runSeedLargeCommand,
   summarizeRuntimeConfig
 };

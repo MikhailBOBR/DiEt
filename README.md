@@ -77,6 +77,8 @@
 
 ### Вариант 1: Docker Compose
 
+Скопируйте `.env.example` в `.env` и замените значения `replace_with_...`, затем выполните:
+
 ```bash
 docker compose up --build
 ```
@@ -90,33 +92,33 @@ docker compose up --build
 
 ### Вариант 2: локальный Node.js
 
+Скопируйте `config/local.yaml.example` в `config/local.yaml`, замените placeholders и при необходимости выберите `DB_PROVIDER: sqlite`, затем выполните:
+
 ```bash
 npm install
 npm run config:check
 npm run migrate
+npm run seed:demo
 npm run dev
 ```
 
-По умолчанию пример конфигурации находится в [.env.example](./.env.example). Для production нельзя оставлять `JWT_SECRET=change_me`.
+Compose-пример находится в [.env.example](./.env.example), а локальный Node использует [config/local.yaml.example](./config/local.yaml.example). Секреты и параметры подключения к БД не имеют рабочих значений по умолчанию; `config/local.yaml` исключён из Git.
 
 ## Тестовые учетные записи
 
-Если включены `SEED_DEMO_DATA=true` или `SEED_LARGE_DATA=true`, доступны учетные записи:
+Учетные записи создаются только явной командой `npm run seed:demo` или demo-профилем Compose. Логины и пароли задаются переменными `DEMO_USER_*` и `ADMIN_USER_*`; рабочие пароли в репозитории не хранятся.
 
-| Роль | Логин | Пароль |
-| --- | --- | --- |
-| Пользователь | `demo@nutritrack.local` | `Demo123!` |
-| Администратор | `admin@nutritrack.local` | `Admin123!` |
+Примерные адреса — `demo@nutritrack.local` и `admin@nutritrack.local`; перед seed необходимо заменить password placeholders в локальном `.env`.
 
 ## Данные и seed
 
 - `PostgreSQL` используется как основная БД для Docker/runtime/deploy-контура, включая Render.
 - `SQLite` оставлен как легкий fallback для локальных изолированных запусков и тестов.
-- `AUTO_MIGRATE_ON_BOOT=true` автоматически применяет схему при старте сервиса.
-- `SEED_DEMO_DATA=true` включает базовый демонстрационный набор данных.
-- `SEED_LARGE_DATA=true` включает массовый seed для полноценной демо-базы.
-- В [docker-compose.yml](./docker-compose.yml) массовый seed включен для локального PostgreSQL-стенда.
-- В [render.yaml](./render.yaml) массовый seed и `autoDeploy` включены для облачного демо-стенда.
+- Web-процесс не выполняет миграции и seed при старте.
+- В Compose миграция выполняется одноразовым сервисом `migrate` до запуска `app`.
+- В Render миграция выполняется отдельной `preDeployCommand`.
+- `npm run seed:demo` запускает базовое наполнение явно.
+- `npm run seed:readable` запускает расширенное человекочитаемое наполнение PostgreSQL явно.
 - `npm run seed:large` запускает массовое наполнение вручную. Команда идемпотентна и не должна создавать дубли при повторном запуске.
 - `starter-workspace` автоматически дозаполняет личные шаблоны, рецепты, избранное и свежую историю для нового или пустого пользователя при регистрации, входе, открытии рецептов/шаблонов и генерации недельного плана.
 
@@ -128,8 +130,9 @@ npm run dev
 | `npm run start` | обычный запуск приложения |
 | `npm run config:check` | проверка runtime-конфигурации |
 | `npm run migrate` | применение схемы БД |
-| `npm run create-admin -- --email=admin@example.com --password=Admin123! --name="Admin User"` | создание администратора |
-| `npm run seed:demo` | человекочитаемые демо-данные |
+| `npm run create-admin -- --email=admin@example.com --password="$ADMIN_PASSWORD" --name="Admin User"` | создание администратора |
+| `npm run seed:demo` | базовые демо-пользователи и данные |
+| `npm run seed:readable` | расширенные человекочитаемые демо-данные PostgreSQL |
 | `npm run seed:large` | массовое демо-наполнение |
 | `npm run check:client` | статические frontend-контракты |
 | `npm test` | основной набор тестов |
@@ -137,7 +140,8 @@ npm run dev
 | `npm run test:fuzz` | fuzzing-сценарии |
 | `npm run test:full` | frontend checks и полный coverage gate |
 | `docker compose up --build` | полный локальный запуск |
-| `docker compose --profile ops run --rm migrate` | миграция через одноразовый контейнер |
+| `docker compose run --rm migrate` | явная миграция через одноразовый контейнер |
+| `docker compose --profile demo run --rm seed-demo` | явное локальное demo-наполнение |
 
 ## Архитектура
 
@@ -146,7 +150,8 @@ npm run dev
 - `client` - статический интерфейс, который обслуживается Express;
 - `server/src/app.js` - сборка Express-приложения, API routes, Swagger и static middleware;
 - `server/src/modules` - доменные модули формата `routes + service`;
-- `server/src/db` - подключение к БД, инициализация схемы, seed и стартовое наполнение личного рабочего пространства;
+- сервисы содержат прикладную логику и SQL-запросы; отдельного repository/application layer нет;
+- `server/src/db` - общий SQL adapter, подключение к БД, инициализация схемы и явные seed-операции;
 - `server/src/middlewares` - request context, auth/RBAC и обработка ошибок;
 - `server/tests` - API, smoke, security, contracts, observability, import/export и fuzz тесты.
 
@@ -178,7 +183,7 @@ npm run dev
 Качество проекта закрывается несколькими слоями:
 
 - `npm run check:client` проверяет статические frontend-контракты;
-- `npm test` запускает 184 автоматических теста на `node:test`;
+- `npm test` запускает 186 автоматических тестов на `node:test`;
 - `npm run test:coverage` генерирует таблицу результатов, surface coverage и raw Node/V8 coverage;
 - `npm run test:v8` включает пороги `100/100/100` по lines, branches и functions;
 - `npm run test:surface` подтверждает 100% покрытие заявленной функциональной поверхности;
@@ -202,13 +207,13 @@ npm run dev
 | Workflow | Запуск | Назначение |
 | --- | --- | --- |
 | [CI](./.github/workflows/ci.yml) | каждый push, pull request, ручной запуск, nightly schedule | проверка кода, тесты, coverage и Docker validation |
-| [CD](./.github/workflows/cd.yml) | release-теги `v*` или ручной запуск | публикация Docker image в GHCR и управляемый deploy |
+| [CD](./.github/workflows/cd.yml) | release-теги `v*` или ручной запуск | GHCR image, migration compatibility и управляемый deploy |
 
 CI проверяет проект на Node.js `20` и `22`, запускает frontend-контракты, основной набор тестов, coverage summary и Docker smoke checks с PostgreSQL.
 
-CD отделен от обычных коммитов: релизный контур через GitHub Actions запускается только по тегу версии или вручную.
+CD отделен от обычных коммитов: по тегу публикуется и проверяется release image; внешний Render deploy запускается только вручную из `main`/`master` через защищенное environment `production`.
 
-Для Render в [render.yaml](./render.yaml) включен `autoDeploy`, поэтому подключенный облачный демо-стенд может обновляться автоматически после изменения отслеживаемой ветки.
+Для Render в [render.yaml](./render.yaml) установлено `autoDeploy: false`. Deployment job требует настроенные hook и service URL, затем проверяет liveness, readiness, OpenAPI и совпадение release version с commit SHA. Репозиторий содержит pipeline, но фактический внешний deploy подтверждается только результатом workflow и deployment evidence.
 
 ## Покрытие требований курсовой
 

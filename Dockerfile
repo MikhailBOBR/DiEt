@@ -5,17 +5,7 @@ WORKDIR /app
 ENV NODE_ENV=production \
     APP_ENV=production \
     SERVER_HOST=0.0.0.0 \
-    PORT=8080 \
-    DB_PROVIDER=postgres \
-    DB_HOST=postgres \
-    DB_PORT=5432 \
-    DB_NAME=nutritrack \
-    DB_USER=nutritrack \
-    DB_PASSWORD=nutritrack \
-    DB_PATH=/data/app.db \
-    AUTO_MIGRATE_ON_BOOT=true \
-    SEED_DEMO_DATA=true \
-    SEED_LARGE_DATA=false
+    PORT=8080
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --omit=optional && npm cache clean --force

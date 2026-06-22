@@ -20,15 +20,16 @@
 ## 3. Конфигурация через окружение
 
 - все ключевые настройки вынесены в [server/src/config/env.js](../server/src/config/env.js)
-- есть значения по умолчанию для локального запуска
+- безопасные технические defaults отделены от обязательных секретов и DB credentials
 - есть [.env.example](../.env.example)
 - `.env` исключен через [.gitignore](../.gitignore)
 - добавлен [config/local.yaml.example](../config/local.yaml.example) для локальной разработки
 - переменные окружения имеют приоритет над YAML-файлом
+- deployment-окружения отклоняют placeholder/короткий JWT secret и требуют PostgreSQL
 
 ## 4. Backing services и stateless-подход
 
-- [docker-compose.yml](../docker-compose.yml) теперь описывает `app`, `postgres`, `redis` и одноразовый сервис `migrate`
+- [docker-compose.yml](../docker-compose.yml) описывает `app`, `postgres`, `redis`, одноразовый `migrate` и явные demo seed profiles
 - авторизация stateless: используется JWT, серверных sticky-сессий нет
 - состояние приложения хранится в БД, а не в памяти процесса
 - для текущего release candidate рабочий Docker/CI/runtime-контур использует `PostgreSQL`
@@ -43,6 +44,7 @@
 - образ получает уникальные теги, включая commit-based tag
 - релиз отделен от конфигурации: настройки передаются через переменные среды
 - release metadata выводится в `health` и structured logs
+- web runtime не выполняет миграции или seed; административные операции запускаются отдельными процессами
 
 ## 6. Логи и наблюдаемость
 
@@ -64,6 +66,8 @@
 
 - `node server/src/cli.js server`
 - `node server/src/cli.js migrate`
+- `node server/src/cli.js seed-demo`
+- `node server/src/cli.js seed-large`
 - `node server/src/cli.js create-admin --email=... --password=... --name=...`
 - в `package.json` добавлены `npm run migrate` и `npm run create-admin`
 - compose содержит одноразовый сервис `migrate`

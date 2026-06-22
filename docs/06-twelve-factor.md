@@ -1,77 +1,53 @@
 # Twelve-Factor App
 
-Ниже зафиксировано соответствие проекта методологии Twelve-Factor App.
+Документ фиксирует фактическое, а не заявленное соответствие проекта методологии Twelve-Factor App.
 
-## 1. Codebase
+| Factor | Статус | Подтверждение и ограничение |
+| --- | --- | --- |
+| I. Codebase | Реализован | Один Git-репозиторий содержит frontend, backend, тесты и инфраструктурные файлы. |
+| II. Dependencies | Реализован | Зависимости объявлены в `package.json` и зафиксированы `package-lock.json`. |
+| III. Config | Реализован для runtime | Секреты и параметры БД поступают извне; Docker image не содержит JWT/DB credentials. Примеры конфигурации содержат только заменяемые placeholders. |
+| IV. Backing services | Реализован | PostgreSQL подключается через `DATABASE_URL`/`DB_*`; SQLite используется только в изолированных локальных тестах. |
+| V. Build, release, run | Реализован в приложении, частичен на платформе | Web-процесс не выполняет миграции и seed. Миграция запускается отдельной release-командой. Render пока самостоятельно собирает тот же commit, поэтому GHCR digest не является доказанным deployed artifact. |
+| VI. Processes | Реализован | Web-процесс stateless; долговременные данные находятся в PostgreSQL. |
+| VII. Port binding | Реализован | Порт задается через `SERVER_PORT`/`PORT`. |
+| VIII. Concurrency | Подготовлен | Состояние вынесено в PostgreSQL; фактическая проверка нескольких реплик остается эксплуатационной задачей. |
+| IX. Disposability | Реализован | Есть graceful shutdown, liveness и readiness endpoints. |
+| X. Dev/prod parity | Частично | Node 22, PostgreSQL 16, Dockerfile и команда миграции унифицированы; реальная parity подтверждается только после staging/production deployment evidence. |
+| XI. Logs | Реализован | Структурированные логи направляются в `stdout/stderr`. |
+| XII. Admin processes | Реализован | Миграция, seed и создание администратора запускаются отдельными CLI-процессами. |
 
-Один репозиторий Git содержит весь исходный код приложения: frontend, backend, тесты, документацию, Docker-конфиги и CI/CD.
+## Config
 
-## 2. Dependencies
+Обязательные секреты и deploy-specific параметры не имеют рабочих значений по умолчанию:
 
-Зависимости явно описаны в [package.json](../package.json) и фиксируются через `package-lock.json`.
+- `JWT_SECRET`;
+- `DATABASE_URL` либо полный набор `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`;
+- пароли bootstrap-пользователей — только для явного seed-процесса.
 
-## 3. Config
+Безопасные технические defaults, например порт и timeout, остаются в коде. Для `production`, `staging`, `release` и `container` включена усиленная проверка: PostgreSQL обязателен, а JWT secret должен содержать не менее 32 символов.
 
-Настройки передаются через переменные окружения:
+## Build, release, run
 
-- `SERVER_PORT`
-- `PORT` / `HOST` для cloud-платформ
-- `JWT_SECRET`
-- `DB_PROVIDER`
-- `DATABASE_URL` и `DB_*` для подключаемой PostgreSQL
-- `DB_PATH` только для локального SQLite fallback в тестовом режиме
-- `DB_POOL_MAX`, `DB_IDLE_TIMEOUT_MS`, `DB_CONNECTION_TIMEOUT_MS`
-- `SERVER_REQUEST_TIMEOUT_MS`, `SERVER_HEADERS_TIMEOUT_MS`, `SERVER_KEEP_ALIVE_TIMEOUT_MS`
+- build: Docker image создается без секретов и environment-specific DB-настроек;
+- release: `npm run migrate` выполняется отдельным процессом, seed запускается только явно;
+- run: `npm start` запускает только HTTP-сервис;
+- Render: `preDeployCommand` применяет миграцию до запуска новой версии;
+- Compose: одноразовый сервис `migrate` должен успешно завершиться до запуска `app`.
 
-Шаблон переменных окружения задан в [.env.example](../.env.example).
+## Admin processes
 
-## 4. Backing Services
+- `npm run migrate`;
+- `npm run seed:demo`;
+- `npm run seed:readable`;
+- `npm run seed:large`;
+- `npm run create-admin`;
+- `npm run config:check`.
 
-База данных рассматривается как подключаемый ресурс. Основной Docker/CI/runtime-контур использует PostgreSQL через `DB_PROVIDER=postgres` и `DATABASE_URL`/`DB_*`; SQLite оставлен как локальный изолированный fallback для тестов без внешнего сервиса.
+## Dev/prod parity
 
-## 5. Build, Release, Run
-
-Проект поддерживает разделение стадий:
-
-- build — сборка docker image;
-- release — публикация образа через CD workflow;
-- run — запуск контейнера локально или в облаке.
-
-## 6. Processes
-
-Приложение запускается как отдельный процесс `node server/src/index.js`. Долговременное состояние хранится не в памяти процесса, а в базе данных.
-
-## 7. Port Binding
-
-HTTP-сервис публикуется через порт `SERVER_PORT` или стандартный для платформ `PORT`, по умолчанию `8080`.
-
-## 8. Concurrency
-
-Проект готов к горизонтальному масштабированию на уровне web-процесса: runtime-контур вынесен на сетевой PostgreSQL, а состояние не хранится в памяти процесса.
-
-## 9. Disposability
-
-Сервис стартует быстро, база инициализируется автоматически, завершение процесса не требует ручных действий пользователя.
-Для оркестраторов добавлены отдельные endpoints: `GET /api/live` для liveness и `GET /api/ready` для readiness с проверкой базы данных.
-
-## 10. Dev/Prod Parity
-
-Локальный запуск, Docker-запуск и CI используют одинаковый стек `Node.js + npm + Docker`, что снижает расхождения между средами.
-
-## 11. Logs
-
-Логи выводятся в стандартный поток процесса Node.js, что совместимо с Docker и облачными платформами.
-
-## 12. Admin Processes
-
-Административные и одноразовые операции вынесены в отдельные команды:
-
-- `npm run seed:large`
-- `npm run migrate`
-- `npm run create-admin`
-- `npm run config:check`
-- `npm run test:fuzz`
+Матрица сред находится в [deploy/parity-matrix.md](../deploy/parity-matrix.md). Статус Factor X остается частичным, пока репозиторий не содержит реального результата staging/production smoke-test. Шаблон evidence не считается доказательством выполненного deploy.
 
 ## Вывод
 
-Проект в текущем состоянии соответствует основным принципам Twelve-Factor App и подготовлен к дальнейшему развитию в сторону production-сценариев.
+Кодовые нарушения Config и Build/Release/Run устранены. Полное соответствие Factor X и неизменяемость deployed artifact не заявляются без фактических эксплуатационных данных.

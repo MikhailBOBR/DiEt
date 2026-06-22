@@ -5,16 +5,18 @@ function buildDatabaseUrl() {
     return process.env.DATABASE_URL;
   }
 
-  if (process.env.DB_PROVIDER === "postgres" || process.env.DB_HOST) {
-    const host = process.env.DB_HOST || "127.0.0.1";
+  const required = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"];
+
+  if (required.every((key) => String(process.env[key] || "").trim())) {
+    const host = process.env.DB_HOST;
     const port = process.env.DB_PORT || "5432";
-    const name = process.env.DB_NAME || "nutritrack";
-    const user = encodeURIComponent(process.env.DB_USER || "nutritrack");
-    const password = encodeURIComponent(process.env.DB_PASSWORD || "nutritrack");
+    const name = process.env.DB_NAME;
+    const user = encodeURIComponent(process.env.DB_USER);
+    const password = encodeURIComponent(process.env.DB_PASSWORD);
     return `postgres://${user}:${password}@${host}:${port}/${name}`;
   }
 
-  return "postgres://nutritrack:nutritrack@127.0.0.1:5432/nutritrack";
+  throw new Error("DATABASE_URL or complete DB_* credentials are required for demo seed");
 }
 
 const databaseUrl = buildDatabaseUrl();

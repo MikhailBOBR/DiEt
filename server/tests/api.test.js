@@ -8,6 +8,8 @@ process.env.DB_PATH = path.resolve(__dirname, "../data/test.db");
 process.env.DB_PROVIDER = "sqlite";
 process.env.DATABASE_URL = "";
 process.env.JWT_SECRET = "test-secret";
+process.env.DEMO_USER_PASSWORD = "Demo123!";
+process.env.ADMIN_USER_PASSWORD = "Admin123!";
 
 const dbFiles = [
   process.env.DB_PATH,

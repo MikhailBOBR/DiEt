@@ -147,15 +147,29 @@ function buildDatabaseUrl(raw) {
     return "";
   }
 
+  if (![raw.DB_HOST, raw.DB_NAME, raw.DB_USER, raw.DB_PASSWORD].every((value) => String(value || "").trim())) {
+    return "";
+  }
+
   return `postgres://${encodeURIComponent(raw.DB_USER)}:${encodeURIComponent(raw.DB_PASSWORD)}@${raw.DB_HOST}:${raw.DB_PORT}/${raw.DB_NAME}`;
 }
 
-function isProductionEnvironment(appEnv) {
-  return ["production", "prod"].includes(String(appEnv).trim().toLowerCase());
+function isDeploymentEnvironment(appEnv) {
+  return ["production", "prod", "staging", "stage", "release", "container"].includes(
+    String(appEnv).trim().toLowerCase()
+  );
 }
 
 function isPlaceholderSecret(secret) {
-  return new Set(["", "change_me", "super-secret-dev-key"]).has(String(secret || "").trim());
+  const normalized = String(secret || "").trim().toLowerCase();
+  return new Set([
+    "",
+    "change_me",
+    "change_me_in_production",
+    "super-secret-dev-key",
+    "secret",
+    "jwt-secret"
+  ]).has(normalized);
 }
 
 function validateConfig(config) {
@@ -176,8 +190,16 @@ function validateConfig(config) {
     throw new Error("DATABASE_URL or DB_* values are required for postgres");
   }
 
-  if (isProductionEnvironment(config.appEnv) && isPlaceholderSecret(config.jwtSecret)) {
-    throw new Error("JWT_SECRET must be set to a non-default value in production");
+  if (isPlaceholderSecret(config.jwtSecret)) {
+    throw new Error("JWT_SECRET must be provided through the environment or a local config file");
+  }
+
+  if (isDeploymentEnvironment(config.appEnv) && config.jwtSecret.length < 32) {
+    throw new Error("JWT_SECRET must contain at least 32 characters in deployment environments");
+  }
+
+  if (isDeploymentEnvironment(config.appEnv) && config.dbProvider !== "postgres") {
+    throw new Error("DB_PROVIDER=postgres is required in deployment environments");
   }
 }
 
@@ -189,18 +211,18 @@ function createConfig() {
   const defaults = {
     APP_ENV: defaultAppEnv,
     SERVICE_NAME: "food-diary-app",
-    RELEASE_VERSION: packageJson.version,
+    RELEASE_VERSION: process.env.RENDER_GIT_COMMIT || packageJson.version,
     SERVER_HOST: "0.0.0.0",
     SERVER_PORT: 8080,
-    JWT_SECRET: "super-secret-dev-key",
+    JWT_SECRET: "",
     DB_PROVIDER: "sqlite",
     DB_PATH: path.join(rootDir, "server", "data", "app.db"),
     DATABASE_URL: "",
-    DB_HOST: "postgres",
+    DB_HOST: "",
     DB_PORT: 5432,
-    DB_NAME: "nutritrack",
-    DB_USER: "nutritrack",
-    DB_PASSWORD: "nutritrack",
+    DB_NAME: "",
+    DB_USER: "",
+    DB_PASSWORD: "",
     REDIS_URL: "redis://redis:6379",
     CLIENT_ROOT: path.join(rootDir, "client"),
     LOG_LEVEL: defaultAppEnv === "test" ? "error" : "info",
@@ -214,14 +236,11 @@ function createConfig() {
     DB_IDLE_TIMEOUT_MS: 30000,
     DB_CONNECTION_TIMEOUT_MS: 5000,
     REQUEST_ID_HEADER: "X-Request-ID",
-    AUTO_MIGRATE_ON_BOOT: defaultAppEnv !== "production",
-    SEED_DEMO_DATA: defaultAppEnv !== "production",
-    SEED_LARGE_DATA: false,
     DEMO_USER_EMAIL: "demo@nutritrack.local",
-    DEMO_USER_PASSWORD: "Demo123!",
+    DEMO_USER_PASSWORD: "",
     DEMO_USER_NAME: "Demo User",
     ADMIN_USER_EMAIL: "admin@nutritrack.local",
-    ADMIN_USER_PASSWORD: "Admin123!",
+    ADMIN_USER_PASSWORD: "",
     ADMIN_USER_NAME: "System Admin"
   };
 
@@ -269,9 +288,6 @@ function createConfig() {
     dbIdleTimeoutMs: parseNumber(merged.DB_IDLE_TIMEOUT_MS, defaults.DB_IDLE_TIMEOUT_MS),
     dbConnectionTimeoutMs: parseNumber(merged.DB_CONNECTION_TIMEOUT_MS, defaults.DB_CONNECTION_TIMEOUT_MS),
     requestIdHeader: String(merged.REQUEST_ID_HEADER || defaults.REQUEST_ID_HEADER),
-    autoMigrateOnBoot: parseBoolean(merged.AUTO_MIGRATE_ON_BOOT, defaults.AUTO_MIGRATE_ON_BOOT),
-    seedDemoData: parseBoolean(merged.SEED_DEMO_DATA, defaults.SEED_DEMO_DATA),
-    seedLargeData: parseBoolean(merged.SEED_LARGE_DATA, defaults.SEED_LARGE_DATA),
     demoUser: {
       email: String(merged.DEMO_USER_EMAIL || defaults.DEMO_USER_EMAIL),
       password: String(merged.DEMO_USER_PASSWORD || defaults.DEMO_USER_PASSWORD),

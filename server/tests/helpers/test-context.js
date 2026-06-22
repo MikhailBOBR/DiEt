@@ -23,6 +23,8 @@ function createHttpTestContext(test, { dbFileName, jwtSecret = "test-secret" }) 
   process.env.DB_PATH = dbPath;
   process.env.DATABASE_URL = "";
   process.env.JWT_SECRET = jwtSecret;
+  process.env.DEMO_USER_PASSWORD = "Demo123!";
+  process.env.ADMIN_USER_PASSWORD = "Admin123!";
 
   const dbFiles = [dbPath, `${dbPath}-wal`, `${dbPath}-shm`];
 

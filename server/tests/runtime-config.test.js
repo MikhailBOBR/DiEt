@@ -5,6 +5,9 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
+process.env.APP_ENV = "test";
+process.env.JWT_SECRET = "runtime-config-suite-secret";
+
 const { createConfig } = require("../src/config/env");
 const { quotePostgresAliases } = require("../src/db/connection");
 const { createLogEntry } = require("../src/lib/logger");
@@ -102,7 +105,6 @@ test("config exposes runtime and backing service tuning from the environment", (
       SERVER_REQUEST_TIMEOUT_MS: "250000",
       SERVER_HEADERS_TIMEOUT_MS: "55000",
       SERVER_KEEP_ALIVE_TIMEOUT_MS: "6000",
-      SEED_LARGE_DATA: "true",
       TRUST_PROXY: "true",
       JWT_SECRET: "runtime-secret"
     },
@@ -115,13 +117,12 @@ test("config exposes runtime and backing service tuning from the environment", (
       assert.equal(config.serverRequestTimeoutMs, 250000);
       assert.equal(config.serverHeadersTimeoutMs, 55000);
       assert.equal(config.serverKeepAliveTimeoutMs, 6000);
-      assert.equal(config.seedLargeData, true);
       assert.equal(config.trustProxy, true);
     }
   );
 });
 
-test("production config rejects default JWT secrets", () => {
+test("production config rejects missing JWT secrets", () => {
   withEnvironment(
     {
       APP_ENV: "production",
@@ -130,6 +131,51 @@ test("production config rejects default JWT secrets", () => {
     },
     () => {
       assert.throws(() => createConfig(), /JWT_SECRET/);
+    }
+  );
+});
+
+test("deployment config rejects short secrets and non-PostgreSQL storage", () => {
+  withEnvironment(
+    {
+      APP_ENV: "container",
+      CONFIG_FILE: undefined,
+      JWT_SECRET: "short-secret",
+      DB_PROVIDER: "sqlite"
+    },
+    () => {
+      assert.throws(() => createConfig(), /at least 32 characters/);
+    }
+  );
+
+  withEnvironment(
+    {
+      APP_ENV: "staging",
+      CONFIG_FILE: undefined,
+      JWT_SECRET: "staging-secret-with-at-least-32-characters",
+      DB_PROVIDER: "sqlite"
+    },
+    () => {
+      assert.throws(() => createConfig(), /DB_PROVIDER=postgres/);
+    }
+  );
+});
+
+test("postgres config requires either DATABASE_URL or complete DB credentials", () => {
+  withEnvironment(
+    {
+      APP_ENV: "test",
+      CONFIG_FILE: undefined,
+      JWT_SECRET: "runtime-config-suite-secret",
+      DB_PROVIDER: "postgres",
+      DATABASE_URL: undefined,
+      DB_HOST: undefined,
+      DB_NAME: undefined,
+      DB_USER: undefined,
+      DB_PASSWORD: undefined
+    },
+    () => {
+      assert.throws(() => createConfig(), /DATABASE_URL or DB_\*/);
     }
   );
 });

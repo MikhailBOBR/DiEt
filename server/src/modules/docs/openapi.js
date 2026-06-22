@@ -841,7 +841,7 @@ const openApiDocument = {
                 type: "object",
                 properties: {
                   email: { type: "string", format: "email", example: "demo@nutritrack.local" },
-                  password: { type: "string", example: "Demo123!" }
+                  password: { type: "string", example: "ConfiguredDemoPassword123!" }
                 },
                 required: ["email", "password"]
               }

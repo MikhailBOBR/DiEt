@@ -1,5 +1,5 @@
 /* node:coverage ignore next 10000 */
-const { adminUser, dbProvider, demoUser, seedDemoData } = require("../config/env");
+const { adminUser, dbProvider, demoUser } = require("../config/env");
 const { db } = require("./connection");
 const { getLocalDate, getTimestamp } = require("../lib/date");
 const { hashPassword } = require("../lib/security");
@@ -1562,7 +1562,13 @@ function runMigrations() {
 }
 
 function initializeDatabase(options = {}) {
-  const { withSeedData = seedDemoData } = options;
+  const { withSeedData = true } = options;
+
+  [adminUser, demoUser].forEach((user) => {
+    if (!user.password || user.password.length < 8) {
+      throw new Error(`Bootstrap password for ${user.email} must contain at least 8 characters`);
+    }
+  });
 
   if (dbProvider !== "postgres") {
     runMigrations();

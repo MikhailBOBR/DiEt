@@ -102,6 +102,9 @@ jobs:
 
       - name: Validate docker compose file
         run: docker compose config
+        env:
+          JWT_SECRET: ci-compose-secret
+          DB_PASSWORD: ci-compose-password
 
       - name: Build Docker image
         run: docker build -t food-diary-app:ci -f Dockerfile .
@@ -140,8 +143,6 @@ jobs:
           -e DB_NAME=nutritrack_ci
           -e DB_USER=nutritrack
           -e DB_PASSWORD=nutritrack
-          -e AUTO_MIGRATE_ON_BOOT=false
-          -e SEED_DEMO_DATA=false
           food-diary-app:ci
           node server/src/cli.js migrate
 
@@ -158,8 +159,6 @@ jobs:
           -e DB_NAME=nutritrack_ci
           -e DB_USER=nutritrack
           -e DB_PASSWORD=nutritrack
-          -e AUTO_MIGRATE_ON_BOOT=false
-          -e SEED_DEMO_DATA=false
           food-diary-app:ci
           node server/src/cli.js create-admin --email=ops@example.local --password=Admin123! --name="Ops Admin"
 

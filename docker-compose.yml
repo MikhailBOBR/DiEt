@@ -1,83 +1,88 @@
 name: food-diary-app
 
+x-app-environment: &app-environment
+  APP_ENV: development
+  RELEASE_VERSION: compose-local
+  SERVER_HOST: 0.0.0.0
+  SERVER_PORT: 8080
+  JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+  DB_PROVIDER: postgres
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_NAME: ${DB_NAME:-nutritrack}
+  DB_USER: ${DB_USER:-nutritrack}
+  DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+  REDIS_URL: redis://redis:6379
+
 services:
   app:
     build:
       context: .
       dockerfile: ./Dockerfile
     restart: unless-stopped
-    environment:
-      APP_ENV: container
-      RELEASE_VERSION: compose-local
-      SERVER_HOST: 0.0.0.0
-      SERVER_PORT: 8080
-      JWT_SECRET: change_me_in_production
-      DB_PROVIDER: postgres
-      DB_PATH: /data/app.db
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: nutritrack
-      DB_USER: nutritrack
-      DB_PASSWORD: nutritrack
-      REDIS_URL: redis://redis:6379
-      AUTO_MIGRATE_ON_BOOT: "true"
-      SEED_DEMO_DATA: "true"
-      SEED_LARGE_DATA: "true"
+    environment: *app-environment
     ports:
       - "${SERVER_PORT:-8080}:8080"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_started
-    volumes:
-      - nutritrack-data:/data
 
   migrate:
     build:
       context: .
       dockerfile: ./Dockerfile
-    profiles:
-      - ops
+    restart: "no"
     command: ["node", "server/src/cli.js", "migrate"]
-    environment:
-      APP_ENV: container
-      RELEASE_VERSION: compose-local
-      SERVER_HOST: 0.0.0.0
-      SERVER_PORT: 8080
-      JWT_SECRET: change_me_in_production
-      DB_PROVIDER: postgres
-      DB_PATH: /data/app.db
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: nutritrack
-      DB_USER: nutritrack
-      DB_PASSWORD: nutritrack
-      REDIS_URL: redis://redis:6379
-      AUTO_MIGRATE_ON_BOOT: "false"
-      SEED_DEMO_DATA: "false"
-      SEED_LARGE_DATA: "false"
-    volumes:
-      - nutritrack-data:/data
+    environment: *app-environment
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_started
+
+  seed-demo:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    profiles: ["demo"]
+    restart: "no"
+    command: ["node", "server/src/cli.js", "seed-demo"]
+    environment:
+      <<: *app-environment
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
+      ADMIN_USER_PASSWORD: ${ADMIN_USER_PASSWORD:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  seed-large:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    profiles: ["large-demo"]
+    restart: "no"
+    command: ["node", "server/src/cli.js", "seed-large"]
+    environment:
+      <<: *app-environment
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
+      ADMIN_USER_PASSWORD: ${ADMIN_USER_PASSWORD:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: nutritrack
-      POSTGRES_USER: nutritrack
-      POSTGRES_PASSWORD: nutritrack
+      POSTGRES_DB: ${DB_NAME:-nutritrack}
+      POSTGRES_USER: ${DB_USER:-nutritrack}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nutritrack -d nutritrack"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-nutritrack} -d ${DB_NAME:-nutritrack}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -91,5 +96,4 @@ services:
       - "${REDIS_PORT:-6379}:6379"
 
 volumes:
-  nutritrack-data:
   postgres-data:

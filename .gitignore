@@ -16,6 +16,7 @@ Desktop.ini
 .env
 .env.local
 .env.*.local
+config/local.yaml
 
 # Logs
 *.log
